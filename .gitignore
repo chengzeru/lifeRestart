@@ -1,5 +1,6 @@
 ~$*.xlsx
 # xlsx temp file
+remake/
 
 # Logs
 logs
