@@ -7,6 +7,8 @@
         "xlsxTransform": "node utils/xlsxTransform.js data"
     },
     "dependencies": {
+        "webpack": "^5.51.2",
+        "webpack-cli": "^4.8.0",
         "xlsx": "^0.17.0"
     },
     "devDependencies": {
