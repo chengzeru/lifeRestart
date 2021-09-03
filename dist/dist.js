@@ -7045,7 +7045,7 @@ var Talent = /*#__PURE__*/function () {
         if (!i && include) return include;
         var gradeRandom = Math.random();
         var grade;
-        if (gradeRandom >= 0.111) grade = 0;else if (gradeRandom >= 0.011) grade = 1;else if (gradeRandom >= 0.001) grade = 2;else grade = 3;
+        if (gradeRandom >= 0.2) grade = 0;else if (gradeRandom >= 0.05) grade = 1;else if (gradeRandom >= 0.01) grade = 2;else grade = 3;
 
         while (talentList[grade].length == 0) {
           grade--;
@@ -7555,9 +7555,9 @@ var App = /*#__PURE__*/function () {
       var _this2 = this;
 
       // Loading
-      var loadingPage = $("\n        <div id=\"main\">\n            <div id=\"title\">\n                \u4EBA\u751F\u91CD\u5F00\u6A21\u62DF\u5668<br>\u6211\u662F\u4EBA\u4E0A\u4EBA<br>\n                <div style=\"font-size:1.5rem; font-weight:normal;\">\u52A0\u8F7D\u4E2D...</div>\n            </div>\n        </div>\n        "); // Index
+      var loadingPage = $("\n        <div id=\"main\">\n            <div id=\"title\">\n                \u4EBA\u751F\u91CD\u5F00\u6A21\u62DF\u5668\u4E4B<br>\u6211\u662F\u4EBA\u4E0A\u4EBA<br>\n                <div style=\"font-size:1.5rem; font-weight:normal;\">\u52A0\u8F7D\u4E2D...</div>\n            </div>\n        </div>\n        "); // Index
 
-      var indexPage = $("\n        <div id=\"main\">\n            <div id=\"cnt\" class=\"head\">\u5DF2\u91CD\u5F001\u6B21</div>\n            <button id=\"rank\">\u6392\u884C\u699C</button>\n            <div id=\"title\">\n                \u4EBA\u751F\u91CD\u5F00\u6A21\u62DF\u5668<br>\u6211\u662F\u4EBA\u4E0A\u4EBA<br>\n                <div style=\"font-size:1.5rem; font-weight:normal;\">\u723D\u6587yyds</div>\n            </div>\n            <button id=\"restart\" class=\"mainbtn\"><span class=\"iconfont\">&#xe6a7;</span>\u7ACB\u5373\u91CD\u5F00</button>\n        </div>\n        ");
+      var indexPage = $("\n        <div id=\"main\">\n            <div id=\"cnt\" class=\"head\">\u5DF2\u91CD\u5F001\u6B21</div>\n            <button id=\"rank\">\u6392\u884C\u699C</button>\n            <div id=\"title\">\n                \u4EBA\u751F\u91CD\u5F00\u6A21\u62DF\u5668\u4E4B<br>\u6211\u662F\u4EBA\u4E0A\u4EBA<br>\n                <div style=\"font-size:1.5rem; font-weight:normal;\">\u723D\u6587yyds</div>\n            </div>\n            <button id=\"restart\" class=\"mainbtn\"><span class=\"iconfont\">&#xe6a7;</span>\u7ACB\u5373\u91CD\u5F00</button>\n        </div>\n        ");
       indexPage.find('#restart').click(function () {
         return _this2.switch('talent');
       });

@@ -34,7 +34,7 @@ class App {
         const loadingPage = $(`
         <div id="main">
             <div id="title">
-                人生重开模拟器<br>我是人上人<br>
+                人生重开模拟器之<br>我是人上人<br>
                 <div style="font-size:1.5rem; font-weight:normal;">加载中...</div>
             </div>
         </div>
@@ -46,7 +46,7 @@ class App {
             <div id="cnt" class="head">已重开1次</div>
             <button id="rank">排行榜</button>
             <div id="title">
-                人生重开模拟器<br>我是人上人<br>
+                人生重开模拟器之<br>我是人上人<br>
                 <div style="font-size:1.5rem; font-weight:normal;">爽文yyds</div>
             </div>
             <button id="restart" class="mainbtn"><span class="iconfont">&#xe6a7;</span>立即重开</button>
