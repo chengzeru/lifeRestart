@@ -2,7 +2,7 @@ import { max, sum } from './functions/util.js';
 import { summary } from './functions/summary.js'
 import Life from './life.js'
 
-const talentNum = 10;
+const talentNum = 8;
 
 
 class App {
@@ -47,7 +47,7 @@ class App {
             <button id="rank">排行榜</button>
             <div id="title">
                 人生重开模拟器——我是人上人<br>
-                <div style="font-size:1.5rem; font-weight:normal;">这垃圾人生一秒也不想呆了</div>
+                <div style="font-size:1.5rem; font-weight:normal;">爽文yyds</div>
             </div>
             <button id="restart" class="mainbtn"><span class="iconfont">&#xe6a7;</span>立即重开</button>
         </div>
@@ -121,7 +121,7 @@ class App {
                     this.hint('请选择' + talentNum + '个天赋');
                     return;
                 }
-                this.#totalMax = 100 + this.#life.getTalentAllocationAddition(Array.from(this.#talentSelected).map(({ id }) => id));
+                this.#totalMax = talentNum + this.#life.getTalentAllocationAddition(Array.from(this.#talentSelected).map(({ id }) => id));
                 this.switch('property');
             })
 
@@ -229,10 +229,10 @@ class App {
         propertyPage
             .find('#start')
             .click(() => {
-                /* if (total() != this.#totalMax) {
+                if (total() != this.#totalMax) {
                     this.hint(`你还有${this.#totalMax - total()}属性点没有分配完`);
                     return;
-                } */
+                }
                 this.#life.restart({
                     CHR: groups.CHR.get(),
                     INT: groups.INT.get(),
@@ -312,7 +312,7 @@ class App {
                 this.#life.talentExtend(this.#selectedExtendTalent);
                 this.#selectedExtendTalent = null;
                 this.#talentSelected.clear();
-                this.#totalMax = 20;
+                this.#totalMax = 40;
                 this.#isEnd = false;
                 this.switch('index');
             });
