@@ -1,6 +1,10 @@
 import { max, sum } from './functions/util.js';
 import { summary } from './functions/summary.js'
 import Life from './life.js'
+
+const talentNum = 10;
+
+
 class App {
     constructor() {
         this.#life = new Life();
@@ -85,8 +89,8 @@ class App {
                                 li.removeClass('selected')
                                 this.#talentSelected.delete(talent);
                             } else {
-                                if (this.#talentSelected.size == 3) {
-                                    this.hint('只能选3个天赋');
+                                if (this.#talentSelected.size == talentNum) {
+                                    this.hint('请选择' + talentNum + '个天赋');
                                     return;
                                 }
 
@@ -113,8 +117,8 @@ class App {
         talentPage
             .find('#next')
             .click(() => {
-                if (this.#talentSelected.size != 3) {
-                    this.hint('请选择3个天赋');
+                if (this.#talentSelected.size != talentNum) {
+                    this.hint('请选择' + talentNum + '个天赋');
                     return;
                 }
                 this.#totalMax = 100 + this.#life.getTalentAllocationAddition(Array.from(this.#talentSelected).map(({ id }) => id));
@@ -167,7 +171,7 @@ class App {
             }
             btnAdd.click(() => {
                 if (total() == this.#totalMax) {
-                    this.hint('没用可分配的点数了');
+                    this.hint('没有可分配的点数了');
                     return;
                 }
                 set(get() + 1);
@@ -188,10 +192,10 @@ class App {
             return { group, get, set };
         }
 
-        groups.CHR = getBtnGroups("颜值", 0, 10); // 颜值 charm CHR
-        groups.INT = getBtnGroups("智力", 0, 10); // 智力 intelligence INT
-        groups.STR = getBtnGroups("体质", 0, 10); // 体质 strength STR
-        groups.MNY = getBtnGroups("家境", 0, 10); // 家境 money MNY
+        groups.CHR = getBtnGroups("颜值", 0, 50); // 颜值 charm CHR
+        groups.INT = getBtnGroups("智力", 0, 50); // 智力 intelligence INT
+        groups.STR = getBtnGroups("体质", 0, 50); // 体质 strength STR
+        groups.MNY = getBtnGroups("家境", 0, 50); // 家境 money MNY
 
         const ul = propertyPage.find('#propertyAllocation');
 
@@ -202,6 +206,8 @@ class App {
         propertyPage
             .find('#random')
             .click(() => {
+                this.hint('人上人请自己选哦');
+                return;
                 let t = this.#totalMax;
                 const arr = [10, 10, 10, 10];
                 while (t > 0) {
@@ -223,10 +229,10 @@ class App {
         propertyPage
             .find('#start')
             .click(() => {
-                if (total() != this.#totalMax) {
+                /* if (total() != this.#totalMax) {
                     this.hint(`你还有${this.#totalMax - total()}属性点没有分配完`);
                     return;
-                }
+                } */
                 this.#life.restart({
                     CHR: groups.CHR.get(),
                     INT: groups.INT.get(),
