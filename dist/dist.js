@@ -1,21 +1,970 @@
 /******/ (() => { // webpackBootstrap
-/******/ 	"use strict";
+/******/ 	var __webpack_modules__ = ({
+
+/***/ 757:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+module.exports = __webpack_require__(666);
+
+
+/***/ }),
+
+/***/ 666:
+/***/ ((module) => {
+
+/**
+ * Copyright (c) 2014-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+var runtime = (function (exports) {
+  "use strict";
+
+  var Op = Object.prototype;
+  var hasOwn = Op.hasOwnProperty;
+  var undefined; // More compressible than void 0.
+  var $Symbol = typeof Symbol === "function" ? Symbol : {};
+  var iteratorSymbol = $Symbol.iterator || "@@iterator";
+  var asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator";
+  var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+
+  function define(obj, key, value) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+    return obj[key];
+  }
+  try {
+    // IE 8 has a broken Object.defineProperty that only works on DOM objects.
+    define({}, "");
+  } catch (err) {
+    define = function(obj, key, value) {
+      return obj[key] = value;
+    };
+  }
+
+  function wrap(innerFn, outerFn, self, tryLocsList) {
+    // If outerFn provided and outerFn.prototype is a Generator, then outerFn.prototype instanceof Generator.
+    var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator;
+    var generator = Object.create(protoGenerator.prototype);
+    var context = new Context(tryLocsList || []);
+
+    // The ._invoke method unifies the implementations of the .next,
+    // .throw, and .return methods.
+    generator._invoke = makeInvokeMethod(innerFn, self, context);
+
+    return generator;
+  }
+  exports.wrap = wrap;
+
+  // Try/catch helper to minimize deoptimizations. Returns a completion
+  // record like context.tryEntries[i].completion. This interface could
+  // have been (and was previously) designed to take a closure to be
+  // invoked without arguments, but in all the cases we care about we
+  // already have an existing method we want to call, so there's no need
+  // to create a new function object. We can even get away with assuming
+  // the method takes exactly one argument, since that happens to be true
+  // in every case, so we don't have to touch the arguments object. The
+  // only additional allocation required is the completion record, which
+  // has a stable shape and so hopefully should be cheap to allocate.
+  function tryCatch(fn, obj, arg) {
+    try {
+      return { type: "normal", arg: fn.call(obj, arg) };
+    } catch (err) {
+      return { type: "throw", arg: err };
+    }
+  }
+
+  var GenStateSuspendedStart = "suspendedStart";
+  var GenStateSuspendedYield = "suspendedYield";
+  var GenStateExecuting = "executing";
+  var GenStateCompleted = "completed";
+
+  // Returning this object from the innerFn has the same effect as
+  // breaking out of the dispatch switch statement.
+  var ContinueSentinel = {};
+
+  // Dummy constructor functions that we use as the .constructor and
+  // .constructor.prototype properties for functions that return Generator
+  // objects. For full spec compliance, you may wish to configure your
+  // minifier not to mangle the names of these two functions.
+  function Generator() {}
+  function GeneratorFunction() {}
+  function GeneratorFunctionPrototype() {}
+
+  // This is a polyfill for %IteratorPrototype% for environments that
+  // don't natively support it.
+  var IteratorPrototype = {};
+  define(IteratorPrototype, iteratorSymbol, function () {
+    return this;
+  });
+
+  var getProto = Object.getPrototypeOf;
+  var NativeIteratorPrototype = getProto && getProto(getProto(values([])));
+  if (NativeIteratorPrototype &&
+      NativeIteratorPrototype !== Op &&
+      hasOwn.call(NativeIteratorPrototype, iteratorSymbol)) {
+    // This environment has a native %IteratorPrototype%; use it instead
+    // of the polyfill.
+    IteratorPrototype = NativeIteratorPrototype;
+  }
+
+  var Gp = GeneratorFunctionPrototype.prototype =
+    Generator.prototype = Object.create(IteratorPrototype);
+  GeneratorFunction.prototype = GeneratorFunctionPrototype;
+  define(Gp, "constructor", GeneratorFunctionPrototype);
+  define(GeneratorFunctionPrototype, "constructor", GeneratorFunction);
+  GeneratorFunction.displayName = define(
+    GeneratorFunctionPrototype,
+    toStringTagSymbol,
+    "GeneratorFunction"
+  );
+
+  // Helper for defining the .next, .throw, and .return methods of the
+  // Iterator interface in terms of a single ._invoke method.
+  function defineIteratorMethods(prototype) {
+    ["next", "throw", "return"].forEach(function(method) {
+      define(prototype, method, function(arg) {
+        return this._invoke(method, arg);
+      });
+    });
+  }
+
+  exports.isGeneratorFunction = function(genFun) {
+    var ctor = typeof genFun === "function" && genFun.constructor;
+    return ctor
+      ? ctor === GeneratorFunction ||
+        // For the native GeneratorFunction constructor, the best we can
+        // do is to check its .name property.
+        (ctor.displayName || ctor.name) === "GeneratorFunction"
+      : false;
+  };
+
+  exports.mark = function(genFun) {
+    if (Object.setPrototypeOf) {
+      Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
+    } else {
+      genFun.__proto__ = GeneratorFunctionPrototype;
+      define(genFun, toStringTagSymbol, "GeneratorFunction");
+    }
+    genFun.prototype = Object.create(Gp);
+    return genFun;
+  };
+
+  // Within the body of any async function, `await x` is transformed to
+  // `yield regeneratorRuntime.awrap(x)`, so that the runtime can test
+  // `hasOwn.call(value, "__await")` to determine if the yielded value is
+  // meant to be awaited.
+  exports.awrap = function(arg) {
+    return { __await: arg };
+  };
+
+  function AsyncIterator(generator, PromiseImpl) {
+    function invoke(method, arg, resolve, reject) {
+      var record = tryCatch(generator[method], generator, arg);
+      if (record.type === "throw") {
+        reject(record.arg);
+      } else {
+        var result = record.arg;
+        var value = result.value;
+        if (value &&
+            typeof value === "object" &&
+            hasOwn.call(value, "__await")) {
+          return PromiseImpl.resolve(value.__await).then(function(value) {
+            invoke("next", value, resolve, reject);
+          }, function(err) {
+            invoke("throw", err, resolve, reject);
+          });
+        }
+
+        return PromiseImpl.resolve(value).then(function(unwrapped) {
+          // When a yielded Promise is resolved, its final value becomes
+          // the .value of the Promise<{value,done}> result for the
+          // current iteration.
+          result.value = unwrapped;
+          resolve(result);
+        }, function(error) {
+          // If a rejected Promise was yielded, throw the rejection back
+          // into the async generator function so it can be handled there.
+          return invoke("throw", error, resolve, reject);
+        });
+      }
+    }
+
+    var previousPromise;
+
+    function enqueue(method, arg) {
+      function callInvokeWithMethodAndArg() {
+        return new PromiseImpl(function(resolve, reject) {
+          invoke(method, arg, resolve, reject);
+        });
+      }
+
+      return previousPromise =
+        // If enqueue has been called before, then we want to wait until
+        // all previous Promises have been resolved before calling invoke,
+        // so that results are always delivered in the correct order. If
+        // enqueue has not been called before, then it is important to
+        // call invoke immediately, without waiting on a callback to fire,
+        // so that the async generator function has the opportunity to do
+        // any necessary setup in a predictable way. This predictability
+        // is why the Promise constructor synchronously invokes its
+        // executor callback, and why async functions synchronously
+        // execute code before the first await. Since we implement simple
+        // async functions in terms of async generators, it is especially
+        // important to get this right, even though it requires care.
+        previousPromise ? previousPromise.then(
+          callInvokeWithMethodAndArg,
+          // Avoid propagating failures to Promises returned by later
+          // invocations of the iterator.
+          callInvokeWithMethodAndArg
+        ) : callInvokeWithMethodAndArg();
+    }
+
+    // Define the unified helper method that is used to implement .next,
+    // .throw, and .return (see defineIteratorMethods).
+    this._invoke = enqueue;
+  }
+
+  defineIteratorMethods(AsyncIterator.prototype);
+  define(AsyncIterator.prototype, asyncIteratorSymbol, function () {
+    return this;
+  });
+  exports.AsyncIterator = AsyncIterator;
+
+  // Note that simple async functions are implemented on top of
+  // AsyncIterator objects; they just return a Promise for the value of
+  // the final result produced by the iterator.
+  exports.async = function(innerFn, outerFn, self, tryLocsList, PromiseImpl) {
+    if (PromiseImpl === void 0) PromiseImpl = Promise;
+
+    var iter = new AsyncIterator(
+      wrap(innerFn, outerFn, self, tryLocsList),
+      PromiseImpl
+    );
+
+    return exports.isGeneratorFunction(outerFn)
+      ? iter // If outerFn is a generator, return the full iterator.
+      : iter.next().then(function(result) {
+          return result.done ? result.value : iter.next();
+        });
+  };
+
+  function makeInvokeMethod(innerFn, self, context) {
+    var state = GenStateSuspendedStart;
+
+    return function invoke(method, arg) {
+      if (state === GenStateExecuting) {
+        throw new Error("Generator is already running");
+      }
+
+      if (state === GenStateCompleted) {
+        if (method === "throw") {
+          throw arg;
+        }
+
+        // Be forgiving, per 25.3.3.3.3 of the spec:
+        // https://people.mozilla.org/~jorendorff/es6-draft.html#sec-generatorresume
+        return doneResult();
+      }
+
+      context.method = method;
+      context.arg = arg;
+
+      while (true) {
+        var delegate = context.delegate;
+        if (delegate) {
+          var delegateResult = maybeInvokeDelegate(delegate, context);
+          if (delegateResult) {
+            if (delegateResult === ContinueSentinel) continue;
+            return delegateResult;
+          }
+        }
+
+        if (context.method === "next") {
+          // Setting context._sent for legacy support of Babel's
+          // function.sent implementation.
+          context.sent = context._sent = context.arg;
+
+        } else if (context.method === "throw") {
+          if (state === GenStateSuspendedStart) {
+            state = GenStateCompleted;
+            throw context.arg;
+          }
+
+          context.dispatchException(context.arg);
+
+        } else if (context.method === "return") {
+          context.abrupt("return", context.arg);
+        }
+
+        state = GenStateExecuting;
+
+        var record = tryCatch(innerFn, self, context);
+        if (record.type === "normal") {
+          // If an exception is thrown from innerFn, we leave state ===
+          // GenStateExecuting and loop back for another invocation.
+          state = context.done
+            ? GenStateCompleted
+            : GenStateSuspendedYield;
+
+          if (record.arg === ContinueSentinel) {
+            continue;
+          }
+
+          return {
+            value: record.arg,
+            done: context.done
+          };
+
+        } else if (record.type === "throw") {
+          state = GenStateCompleted;
+          // Dispatch the exception by looping back around to the
+          // context.dispatchException(context.arg) call above.
+          context.method = "throw";
+          context.arg = record.arg;
+        }
+      }
+    };
+  }
+
+  // Call delegate.iterator[context.method](context.arg) and handle the
+  // result, either by returning a { value, done } result from the
+  // delegate iterator, or by modifying context.method and context.arg,
+  // setting context.delegate to null, and returning the ContinueSentinel.
+  function maybeInvokeDelegate(delegate, context) {
+    var method = delegate.iterator[context.method];
+    if (method === undefined) {
+      // A .throw or .return when the delegate iterator has no .throw
+      // method always terminates the yield* loop.
+      context.delegate = null;
+
+      if (context.method === "throw") {
+        // Note: ["return"] must be used for ES3 parsing compatibility.
+        if (delegate.iterator["return"]) {
+          // If the delegate iterator has a return method, give it a
+          // chance to clean up.
+          context.method = "return";
+          context.arg = undefined;
+          maybeInvokeDelegate(delegate, context);
+
+          if (context.method === "throw") {
+            // If maybeInvokeDelegate(context) changed context.method from
+            // "return" to "throw", let that override the TypeError below.
+            return ContinueSentinel;
+          }
+        }
+
+        context.method = "throw";
+        context.arg = new TypeError(
+          "The iterator does not provide a 'throw' method");
+      }
+
+      return ContinueSentinel;
+    }
+
+    var record = tryCatch(method, delegate.iterator, context.arg);
+
+    if (record.type === "throw") {
+      context.method = "throw";
+      context.arg = record.arg;
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    var info = record.arg;
+
+    if (! info) {
+      context.method = "throw";
+      context.arg = new TypeError("iterator result is not an object");
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    if (info.done) {
+      // Assign the result of the finished delegate to the temporary
+      // variable specified by delegate.resultName (see delegateYield).
+      context[delegate.resultName] = info.value;
+
+      // Resume execution at the desired location (see delegateYield).
+      context.next = delegate.nextLoc;
+
+      // If context.method was "throw" but the delegate handled the
+      // exception, let the outer generator proceed normally. If
+      // context.method was "next", forget context.arg since it has been
+      // "consumed" by the delegate iterator. If context.method was
+      // "return", allow the original .return call to continue in the
+      // outer generator.
+      if (context.method !== "return") {
+        context.method = "next";
+        context.arg = undefined;
+      }
+
+    } else {
+      // Re-yield the result returned by the delegate method.
+      return info;
+    }
+
+    // The delegate iterator is finished, so forget it and continue with
+    // the outer generator.
+    context.delegate = null;
+    return ContinueSentinel;
+  }
+
+  // Define Generator.prototype.{next,throw,return} in terms of the
+  // unified ._invoke helper method.
+  defineIteratorMethods(Gp);
+
+  define(Gp, toStringTagSymbol, "Generator");
+
+  // A Generator should always return itself as the iterator object when the
+  // @@iterator function is called on it. Some browsers' implementations of the
+  // iterator prototype chain incorrectly implement this, causing the Generator
+  // object to not be returned from this call. This ensures that doesn't happen.
+  // See https://github.com/facebook/regenerator/issues/274 for more details.
+  define(Gp, iteratorSymbol, function() {
+    return this;
+  });
+
+  define(Gp, "toString", function() {
+    return "[object Generator]";
+  });
+
+  function pushTryEntry(locs) {
+    var entry = { tryLoc: locs[0] };
+
+    if (1 in locs) {
+      entry.catchLoc = locs[1];
+    }
+
+    if (2 in locs) {
+      entry.finallyLoc = locs[2];
+      entry.afterLoc = locs[3];
+    }
+
+    this.tryEntries.push(entry);
+  }
+
+  function resetTryEntry(entry) {
+    var record = entry.completion || {};
+    record.type = "normal";
+    delete record.arg;
+    entry.completion = record;
+  }
+
+  function Context(tryLocsList) {
+    // The root entry object (effectively a try statement without a catch
+    // or a finally block) gives us a place to store values thrown from
+    // locations where there is no enclosing try statement.
+    this.tryEntries = [{ tryLoc: "root" }];
+    tryLocsList.forEach(pushTryEntry, this);
+    this.reset(true);
+  }
+
+  exports.keys = function(object) {
+    var keys = [];
+    for (var key in object) {
+      keys.push(key);
+    }
+    keys.reverse();
+
+    // Rather than returning an object with a next method, we keep
+    // things simple and return the next function itself.
+    return function next() {
+      while (keys.length) {
+        var key = keys.pop();
+        if (key in object) {
+          next.value = key;
+          next.done = false;
+          return next;
+        }
+      }
+
+      // To avoid creating an additional object, we just hang the .value
+      // and .done properties off the next function object itself. This
+      // also ensures that the minifier will not anonymize the function.
+      next.done = true;
+      return next;
+    };
+  };
+
+  function values(iterable) {
+    if (iterable) {
+      var iteratorMethod = iterable[iteratorSymbol];
+      if (iteratorMethod) {
+        return iteratorMethod.call(iterable);
+      }
+
+      if (typeof iterable.next === "function") {
+        return iterable;
+      }
+
+      if (!isNaN(iterable.length)) {
+        var i = -1, next = function next() {
+          while (++i < iterable.length) {
+            if (hasOwn.call(iterable, i)) {
+              next.value = iterable[i];
+              next.done = false;
+              return next;
+            }
+          }
+
+          next.value = undefined;
+          next.done = true;
+
+          return next;
+        };
+
+        return next.next = next;
+      }
+    }
+
+    // Return an iterator with no values.
+    return { next: doneResult };
+  }
+  exports.values = values;
+
+  function doneResult() {
+    return { value: undefined, done: true };
+  }
+
+  Context.prototype = {
+    constructor: Context,
+
+    reset: function(skipTempReset) {
+      this.prev = 0;
+      this.next = 0;
+      // Resetting context._sent for legacy support of Babel's
+      // function.sent implementation.
+      this.sent = this._sent = undefined;
+      this.done = false;
+      this.delegate = null;
+
+      this.method = "next";
+      this.arg = undefined;
+
+      this.tryEntries.forEach(resetTryEntry);
+
+      if (!skipTempReset) {
+        for (var name in this) {
+          // Not sure about the optimal order of these conditions:
+          if (name.charAt(0) === "t" &&
+              hasOwn.call(this, name) &&
+              !isNaN(+name.slice(1))) {
+            this[name] = undefined;
+          }
+        }
+      }
+    },
+
+    stop: function() {
+      this.done = true;
+
+      var rootEntry = this.tryEntries[0];
+      var rootRecord = rootEntry.completion;
+      if (rootRecord.type === "throw") {
+        throw rootRecord.arg;
+      }
+
+      return this.rval;
+    },
+
+    dispatchException: function(exception) {
+      if (this.done) {
+        throw exception;
+      }
+
+      var context = this;
+      function handle(loc, caught) {
+        record.type = "throw";
+        record.arg = exception;
+        context.next = loc;
+
+        if (caught) {
+          // If the dispatched exception was caught by a catch block,
+          // then let that catch block handle the exception normally.
+          context.method = "next";
+          context.arg = undefined;
+        }
+
+        return !! caught;
+      }
+
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        var record = entry.completion;
+
+        if (entry.tryLoc === "root") {
+          // Exception thrown outside of any try block that could handle
+          // it, so set the completion value of the entire function to
+          // throw the exception.
+          return handle("end");
+        }
+
+        if (entry.tryLoc <= this.prev) {
+          var hasCatch = hasOwn.call(entry, "catchLoc");
+          var hasFinally = hasOwn.call(entry, "finallyLoc");
+
+          if (hasCatch && hasFinally) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            } else if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else if (hasCatch) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            }
+
+          } else if (hasFinally) {
+            if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else {
+            throw new Error("try statement without catch or finally");
+          }
+        }
+      }
+    },
+
+    abrupt: function(type, arg) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc <= this.prev &&
+            hasOwn.call(entry, "finallyLoc") &&
+            this.prev < entry.finallyLoc) {
+          var finallyEntry = entry;
+          break;
+        }
+      }
+
+      if (finallyEntry &&
+          (type === "break" ||
+           type === "continue") &&
+          finallyEntry.tryLoc <= arg &&
+          arg <= finallyEntry.finallyLoc) {
+        // Ignore the finally entry if control is not jumping to a
+        // location outside the try/catch block.
+        finallyEntry = null;
+      }
+
+      var record = finallyEntry ? finallyEntry.completion : {};
+      record.type = type;
+      record.arg = arg;
+
+      if (finallyEntry) {
+        this.method = "next";
+        this.next = finallyEntry.finallyLoc;
+        return ContinueSentinel;
+      }
+
+      return this.complete(record);
+    },
+
+    complete: function(record, afterLoc) {
+      if (record.type === "throw") {
+        throw record.arg;
+      }
+
+      if (record.type === "break" ||
+          record.type === "continue") {
+        this.next = record.arg;
+      } else if (record.type === "return") {
+        this.rval = this.arg = record.arg;
+        this.method = "return";
+        this.next = "end";
+      } else if (record.type === "normal" && afterLoc) {
+        this.next = afterLoc;
+      }
+
+      return ContinueSentinel;
+    },
+
+    finish: function(finallyLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.finallyLoc === finallyLoc) {
+          this.complete(entry.completion, entry.afterLoc);
+          resetTryEntry(entry);
+          return ContinueSentinel;
+        }
+      }
+    },
+
+    "catch": function(tryLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc === tryLoc) {
+          var record = entry.completion;
+          if (record.type === "throw") {
+            var thrown = record.arg;
+            resetTryEntry(entry);
+          }
+          return thrown;
+        }
+      }
+
+      // The context.catch method must only be called with a location
+      // argument that corresponds to a known catch block.
+      throw new Error("illegal catch attempt");
+    },
+
+    delegateYield: function(iterable, resultName, nextLoc) {
+      this.delegate = {
+        iterator: values(iterable),
+        resultName: resultName,
+        nextLoc: nextLoc
+      };
+
+      if (this.method === "next") {
+        // Deliberately forget the last sent value so that we don't
+        // accidentally pass it on to the delegate.
+        this.arg = undefined;
+      }
+
+      return ContinueSentinel;
+    }
+  };
+
+  // Regardless of whether this script is executing as a CommonJS module
+  // or not, return the runtime object so that we can declare the variable
+  // regeneratorRuntime in the outer scope, which allows this module to be
+  // injected easily by `bin/regenerator --include-runtime script.js`.
+  return exports;
+
+}(
+  // If this script is executing as a CommonJS module, use module.exports
+  // as the regeneratorRuntime namespace. Otherwise create a new empty
+  // object. Either way, the resulting object will be used to initialize
+  // the regeneratorRuntime variable at the top of this file.
+   true ? module.exports : 0
+));
+
+try {
+  regeneratorRuntime = runtime;
+} catch (accidentalStrictMode) {
+  // This module should not be running in strict mode, so the above
+  // assignment should always work unless something is misconfigured. Just
+  // in case runtime.js accidentally runs in strict mode, in modern engines
+  // we can explicitly access globalThis. In older engines we can escape
+  // strict mode using a global Function call. This could conceivably fail
+  // if a Content Security Policy forbids using Function, but in that case
+  // the proper solution is to fix the accidental strict mode problem. If
+  // you've misconfigured your bundler to force strict mode and applied a
+  // CSP to forbid Function, and you're not willing to fix either of those
+  // problems, please detail your unique predicament in a GitHub issue.
+  if (typeof globalThis === "object") {
+    globalThis.regeneratorRuntime = runtime;
+  } else {
+    Function("r", "regeneratorRuntime = r")(runtime);
+  }
+}
+
+
+/***/ })
+
+/******/ 	});
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			// no module.id needed
+/******/ 			// no module.loaded needed
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/************************************************************************/
 var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be in strict mode.
+(() => {
+"use strict";
 
+;// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
+  try {
+    var info = gen[key](arg);
+    var value = info.value;
+  } catch (error) {
+    reject(error);
+    return;
+  }
+
+  if (info.done) {
+    resolve(value);
+  } else {
+    Promise.resolve(value).then(_next, _throw);
+  }
+}
+
+function _asyncToGenerator(fn) {
+  return function () {
+    var self = this,
+        args = arguments;
+    return new Promise(function (resolve, reject) {
+      var gen = fn.apply(self, args);
+
+      function _next(value) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
+      }
+
+      function _throw(err) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
+      }
+
+      _next(undefined);
+    });
+  };
+}
+;// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/classCallCheck.js
+function _classCallCheck(instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+}
+;// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/createClass.js
+function _defineProperties(target, props) {
+  for (var i = 0; i < props.length; i++) {
+    var descriptor = props[i];
+    descriptor.enumerable = descriptor.enumerable || false;
+    descriptor.configurable = true;
+    if ("value" in descriptor) descriptor.writable = true;
+    Object.defineProperty(target, descriptor.key, descriptor);
+  }
+}
+
+function _createClass(Constructor, protoProps, staticProps) {
+  if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+  if (staticProps) _defineProperties(Constructor, staticProps);
+  return Constructor;
+}
+;// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/classApplyDescriptorGet.js
+function _classApplyDescriptorGet(receiver, descriptor) {
+  if (descriptor.get) {
+    return descriptor.get.call(receiver);
+  }
+
+  return descriptor.value;
+}
+;// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/classExtractFieldDescriptor.js
+function _classExtractFieldDescriptor(receiver, privateMap, action) {
+  if (!privateMap.has(receiver)) {
+    throw new TypeError("attempted to " + action + " private field on non-instance");
+  }
+
+  return privateMap.get(receiver);
+}
+;// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/classPrivateFieldGet.js
+
+
+function _classPrivateFieldGet(receiver, privateMap) {
+  var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "get");
+  return _classApplyDescriptorGet(receiver, descriptor);
+}
+;// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/classApplyDescriptorSet.js
+function _classApplyDescriptorSet(receiver, descriptor, value) {
+  if (descriptor.set) {
+    descriptor.set.call(receiver, value);
+  } else {
+    if (!descriptor.writable) {
+      throw new TypeError("attempted to set read only private field");
+    }
+
+    descriptor.value = value;
+  }
+}
+;// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/classPrivateFieldSet.js
+
+
+function _classPrivateFieldSet(receiver, privateMap, value) {
+  var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "set");
+  _classApplyDescriptorSet(receiver, descriptor, value);
+  return value;
+}
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/regenerator/index.js
+var regenerator = __webpack_require__(757);
+;// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/arrayLikeToArray.js
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+
+  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+    arr2[i] = arr[i];
+  }
+
+  return arr2;
+}
+;// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/arrayWithoutHoles.js
+
+function _arrayWithoutHoles(arr) {
+  if (Array.isArray(arr)) return _arrayLikeToArray(arr);
+}
+;// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/iterableToArray.js
+function _iterableToArray(iter) {
+  if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
+}
+;// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/unsupportedIterableToArray.js
+
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(o);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+}
+;// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/nonIterableSpread.js
+function _nonIterableSpread() {
+  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+;// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/toConsumableArray.js
+
+
+
+
+function toConsumableArray_toConsumableArray(arr) {
+  return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
+}
+;// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/typeof.js
+function _typeof(obj) {
+  "@babel/helpers - typeof";
+
+  if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+    _typeof = function _typeof(obj) {
+      return typeof obj;
+    };
+  } else {
+    _typeof = function _typeof(obj) {
+      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+    };
+  }
+
+  return _typeof(obj);
+}
 ;// CONCATENATED MODULE: ./src/functions/util.js
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function clone(value) {
   switch (_typeof(value)) {
@@ -41,7 +990,7 @@ function max() {
     arr[_key] = arguments[_key];
   }
 
-  return Math.max.apply(Math, _toConsumableArray(arr.flat()));
+  return Math.max.apply(Math, toConsumableArray_toConsumableArray(arr.flat()));
 }
 
 function min() {
@@ -347,34 +1296,83 @@ function summary(type, value) {
 }
 
 
+;// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/arrayWithHoles.js
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+;// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/iterableToArrayLimit.js
+function _iterableToArrayLimit(arr, i) {
+  var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"];
+
+  if (_i == null) return;
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+
+  var _s, _e;
+
+  try {
+    for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
+  }
+
+  return _arr;
+}
+;// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/nonIterableRest.js
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+;// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/slicedToArray.js
+
+
+
+
+function _slicedToArray(arr, i) {
+  return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
+}
+;// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/defineProperty.js
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+}
 ;// CONCATENATED MODULE: ./src/property.js
+
+
+
+
+
+
 function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = property_unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
 function property_unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return property_arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return property_arrayLikeToArray(o, minLen); }
 
 function property_arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
 function _classPrivateFieldInitSpec(obj, privateMap, value) { _checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
 
 function _checkPrivateRedeclaration(obj, privateCollection) { if (privateCollection.has(obj)) { throw new TypeError("Cannot initialize the same private elements twice on an object"); } }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-function _classPrivateFieldGet(receiver, privateMap) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "get"); return _classApplyDescriptorGet(receiver, descriptor); }
-
-function _classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
-
-function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "set"); _classApplyDescriptorSet(receiver, descriptor, value); return value; }
-
-function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!privateMap.has(receiver)) { throw new TypeError("attempted to " + action + " private field on non-instance"); } return privateMap.get(receiver); }
-
-function _classApplyDescriptorSet(receiver, descriptor, value) { if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } }
 
 
 
@@ -762,39 +1760,21 @@ function checkProp(property, condition) {
 
 
 ;// CONCATENATED MODULE: ./src/event.js
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || event_unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
-function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
 
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
-function event_createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = event_unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+
+function event_createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = event_unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
 function event_unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return event_arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return event_arrayLikeToArray(o, minLen); }
 
 function event_arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-function event_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function event_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function event_createClass(Constructor, protoProps, staticProps) { if (protoProps) event_defineProperties(Constructor.prototype, protoProps); if (staticProps) event_defineProperties(Constructor, staticProps); return Constructor; }
-
 function event_classPrivateFieldInitSpec(obj, privateMap, value) { event_checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
 
 function event_checkPrivateRedeclaration(obj, privateCollection) { if (privateCollection.has(obj)) { throw new TypeError("Cannot initialize the same private elements twice on an object"); } }
-
-function event_classPrivateFieldGet(receiver, privateMap) { var descriptor = event_classExtractFieldDescriptor(receiver, privateMap, "get"); return event_classApplyDescriptorGet(receiver, descriptor); }
-
-function event_classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
-
-function event_classPrivateFieldSet(receiver, privateMap, value) { var descriptor = event_classExtractFieldDescriptor(receiver, privateMap, "set"); event_classApplyDescriptorSet(receiver, descriptor, value); return value; }
-
-function event_classExtractFieldDescriptor(receiver, privateMap, action) { if (!privateMap.has(receiver)) { throw new TypeError("attempted to " + action + " private field on non-instance"); } return privateMap.get(receiver); }
-
-function event_classApplyDescriptorSet(receiver, descriptor, value) { if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } }
 
 
 
@@ -803,7 +1783,7 @@ var _events = /*#__PURE__*/new WeakMap();
 
 var Event = /*#__PURE__*/function () {
   function Event() {
-    event_classCallCheck(this, Event);
+    _classCallCheck(this, Event);
 
     event_classPrivateFieldInitSpec(this, _events, {
       writable: true,
@@ -811,12 +1791,12 @@ var Event = /*#__PURE__*/function () {
     });
   }
 
-  event_createClass(Event, [{
+  _createClass(Event, [{
     key: "initial",
     value: function initial(_ref) {
       var events = _ref.events;
 
-      event_classPrivateFieldSet(this, _events, events);
+      _classPrivateFieldSet(this, _events, events);
 
       for (var id in events) {
         var event = events[id];
@@ -844,7 +1824,7 @@ var Event = /*#__PURE__*/function () {
   }, {
     key: "get",
     value: function get(eventId) {
-      var event = event_classPrivateFieldGet(this, _events)[eventId];
+      var event = _classPrivateFieldGet(this, _events)[eventId];
 
       if (!event) throw new Error("[ERROR] No Event[".concat(eventId, "]"));
       return clone(event);
@@ -904,31 +1884,20 @@ var Event = /*#__PURE__*/function () {
 
 /* harmony default export */ const src_event = (Event);
 ;// CONCATENATED MODULE: ./src/talent.js
+
+
+
+
+
 function talent_createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = talent_unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
 function talent_unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return talent_arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return talent_arrayLikeToArray(o, minLen); }
 
 function talent_arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-function talent_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function talent_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function talent_createClass(Constructor, protoProps, staticProps) { if (protoProps) talent_defineProperties(Constructor.prototype, protoProps); if (staticProps) talent_defineProperties(Constructor, staticProps); return Constructor; }
-
 function talent_classPrivateFieldInitSpec(obj, privateMap, value) { talent_checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
 
 function talent_checkPrivateRedeclaration(obj, privateCollection) { if (privateCollection.has(obj)) { throw new TypeError("Cannot initialize the same private elements twice on an object"); } }
-
-function talent_classPrivateFieldGet(receiver, privateMap) { var descriptor = talent_classExtractFieldDescriptor(receiver, privateMap, "get"); return talent_classApplyDescriptorGet(receiver, descriptor); }
-
-function talent_classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
-
-function talent_classPrivateFieldSet(receiver, privateMap, value) { var descriptor = talent_classExtractFieldDescriptor(receiver, privateMap, "set"); talent_classApplyDescriptorSet(receiver, descriptor, value); return value; }
-
-function talent_classExtractFieldDescriptor(receiver, privateMap, action) { if (!privateMap.has(receiver)) { throw new TypeError("attempted to " + action + " private field on non-instance"); } return privateMap.get(receiver); }
-
-function talent_classApplyDescriptorSet(receiver, descriptor, value) { if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } }
 
 
 
@@ -937,7 +1906,7 @@ var _talents = /*#__PURE__*/new WeakMap();
 
 var Talent = /*#__PURE__*/function () {
   function Talent() {
-    talent_classCallCheck(this, Talent);
+    _classCallCheck(this, Talent);
 
     talent_classPrivateFieldInitSpec(this, _talents, {
       writable: true,
@@ -945,12 +1914,12 @@ var Talent = /*#__PURE__*/function () {
     });
   }
 
-  talent_createClass(Talent, [{
+  _createClass(Talent, [{
     key: "initial",
     value: function initial(_ref) {
       var talents = _ref.talents;
 
-      talent_classPrivateFieldSet(this, _talents, talents);
+      _classPrivateFieldSet(this, _talents, talents);
 
       for (var id in talents) {
         var talent = talents[id];
@@ -969,7 +1938,7 @@ var Talent = /*#__PURE__*/function () {
   }, {
     key: "get",
     value: function get(talentId) {
-      var talent = talent_classPrivateFieldGet(this, _talents)[talentId];
+      var talent = _classPrivateFieldGet(this, _talents)[talentId];
 
       if (!talent) throw new Error("[ERROR] No Talent[".concat(talentId, "]"));
       return clone(talent);
@@ -1031,8 +2000,8 @@ var Talent = /*#__PURE__*/function () {
       // 1000, 100, 10, 1
       var talentList = {};
 
-      for (var talentId in talent_classPrivateFieldGet(this, _talents)) {
-        var _classPrivateFieldGet2 = talent_classPrivateFieldGet(this, _talents)[talentId],
+      for (var talentId in _classPrivateFieldGet(this, _talents)) {
+        var _classPrivateFieldGet2 = _classPrivateFieldGet(this, _talents)[talentId],
             id = _classPrivateFieldGet2.id,
             grade = _classPrivateFieldGet2.grade,
             name = _classPrivateFieldGet2.name,
@@ -1126,43 +2095,24 @@ var Talent = /*#__PURE__*/function () {
 
 /* harmony default export */ const talent = (Talent);
 ;// CONCATENATED MODULE: ./src/life.js
-function life_slicedToArray(arr, i) { return life_arrayWithHoles(arr) || life_iterableToArrayLimit(arr, i) || life_unsupportedIterableToArray(arr, i) || life_nonIterableRest(); }
 
-function life_nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
-function life_iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
 
-function life_arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
-function life_createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = life_unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+
+
+function life_createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = life_unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
 function life_unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return life_arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return life_arrayLikeToArray(o, minLen); }
 
 function life_arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
-function life_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function life_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function life_createClass(Constructor, protoProps, staticProps) { if (protoProps) life_defineProperties(Constructor.prototype, protoProps); if (staticProps) life_defineProperties(Constructor, staticProps); return Constructor; }
 
 function life_classPrivateFieldInitSpec(obj, privateMap, value) { life_checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
 
 function life_checkPrivateRedeclaration(obj, privateCollection) { if (privateCollection.has(obj)) { throw new TypeError("Cannot initialize the same private elements twice on an object"); } }
-
-function life_classPrivateFieldGet(receiver, privateMap) { var descriptor = life_classExtractFieldDescriptor(receiver, privateMap, "get"); return life_classApplyDescriptorGet(receiver, descriptor); }
-
-function life_classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
-
-function life_classPrivateFieldSet(receiver, privateMap, value) { var descriptor = life_classExtractFieldDescriptor(receiver, privateMap, "set"); life_classApplyDescriptorSet(receiver, descriptor, value); return value; }
-
-function life_classExtractFieldDescriptor(receiver, privateMap, action) { if (!privateMap.has(receiver)) { throw new TypeError("attempted to " + action + " private field on non-instance"); } return privateMap.get(receiver); }
-
-function life_classApplyDescriptorSet(receiver, descriptor, value) { if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } }
 
 
 
@@ -1178,7 +2128,7 @@ var _triggerTalents = /*#__PURE__*/new WeakMap();
 
 var Life = /*#__PURE__*/function () {
   function Life() {
-    life_classCallCheck(this, Life);
+    _classCallCheck(this, Life);
 
     life_classPrivateFieldInitSpec(this, _property, {
       writable: true,
@@ -1200,19 +2150,19 @@ var Life = /*#__PURE__*/function () {
       value: void 0
     });
 
-    life_classPrivateFieldSet(this, _property, new property());
+    _classPrivateFieldSet(this, _property, new property());
 
-    life_classPrivateFieldSet(this, _event, new src_event());
+    _classPrivateFieldSet(this, _event, new src_event());
 
-    life_classPrivateFieldSet(this, _talent, new talent());
+    _classPrivateFieldSet(this, _talent, new talent());
   }
 
-  life_createClass(Life, [{
+  _createClass(Life, [{
     key: "initial",
     value: function () {
-      var _initial = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+      var _initial = _asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee() {
         var age, talents, events;
-        return regeneratorRuntime.wrap(function _callee$(_context) {
+        return regenerator.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
@@ -1232,15 +2182,15 @@ var Life = /*#__PURE__*/function () {
               case 8:
                 events = _context.sent;
 
-                life_classPrivateFieldGet(this, _property).initial({
+                _classPrivateFieldGet(this, _property).initial({
                   age: age
                 });
 
-                life_classPrivateFieldGet(this, _talent).initial({
+                _classPrivateFieldGet(this, _talent).initial({
                   talents: talents
                 });
 
-                life_classPrivateFieldGet(this, _event).initial({
+                _classPrivateFieldGet(this, _event).initial({
                   events: events
                 });
 
@@ -1261,23 +2211,23 @@ var Life = /*#__PURE__*/function () {
   }, {
     key: "restart",
     value: function restart(allocation) {
-      life_classPrivateFieldSet(this, _triggerTalents, new Set());
+      _classPrivateFieldSet(this, _triggerTalents, new Set());
 
-      life_classPrivateFieldGet(this, _property).restart(allocation);
+      _classPrivateFieldGet(this, _property).restart(allocation);
 
       this.doTalent();
 
-      life_classPrivateFieldGet(this, _property).record();
+      _classPrivateFieldGet(this, _property).record();
     }
   }, {
     key: "getTalentAllocationAddition",
     value: function getTalentAllocationAddition(talents) {
-      return life_classPrivateFieldGet(this, _talent).allocationAddition(talents);
+      return _classPrivateFieldGet(this, _talent).allocationAddition(talents);
     }
   }, {
     key: "next",
     value: function next() {
-      var _classPrivateFieldGet2 = life_classPrivateFieldGet(this, _property).ageNext(),
+      var _classPrivateFieldGet2 = _classPrivateFieldGet(this, _property).ageNext(),
           age = _classPrivateFieldGet2.age,
           event = _classPrivateFieldGet2.event,
           talent = _classPrivateFieldGet2.talent;
@@ -1285,9 +2235,9 @@ var Life = /*#__PURE__*/function () {
       var talentContent = this.doTalent(talent);
       var eventContent = this.doEvent(this.random(event));
 
-      life_classPrivateFieldGet(this, _property).record();
+      _classPrivateFieldGet(this, _property).record();
 
-      var isEnd = life_classPrivateFieldGet(this, _property).isEnd();
+      var isEnd = _classPrivateFieldGet(this, _property).isEnd();
 
       var content = [talentContent, eventContent].flat();
       return {
@@ -1301,9 +2251,9 @@ var Life = /*#__PURE__*/function () {
     value: function doTalent(talents) {
       var _this = this;
 
-      if (talents) life_classPrivateFieldGet(this, _property).change(life_classPrivateFieldGet(this, _property).TYPES.TLT, talents);
-      talents = life_classPrivateFieldGet(this, _property).get(life_classPrivateFieldGet(this, _property).TYPES.TLT).filter(function (talentId) {
-        return !life_classPrivateFieldGet(_this, _triggerTalents).has(talentId);
+      if (talents) _classPrivateFieldGet(this, _property).change(_classPrivateFieldGet(this, _property).TYPES.TLT, talents);
+      talents = _classPrivateFieldGet(this, _property).get(_classPrivateFieldGet(this, _property).TYPES.TLT).filter(function (talentId) {
+        return !_classPrivateFieldGet(_this, _triggerTalents).has(talentId);
       });
       var contents = [];
 
@@ -1314,25 +2264,25 @@ var Life = /*#__PURE__*/function () {
         for (_iterator.s(); !(_step = _iterator.n()).done;) {
           var talentId = _step.value;
 
-          var result = life_classPrivateFieldGet(this, _talent)["do"](talentId, life_classPrivateFieldGet(this, _property));
+          var result = _classPrivateFieldGet(this, _talent)["do"](talentId, _classPrivateFieldGet(this, _property));
 
           if (!result) continue;
 
-          life_classPrivateFieldGet(this, _triggerTalents).add(talentId);
+          _classPrivateFieldGet(this, _triggerTalents).add(talentId);
 
           var effect = result.effect,
               name = result.name,
               description = result.description,
               grade = result.grade;
           contents.push({
-            type: life_classPrivateFieldGet(this, _property).TYPES.TLT,
+            type: _classPrivateFieldGet(this, _property).TYPES.TLT,
             name: name,
             grade: grade,
             description: description
           });
           if (!effect) continue;
 
-          life_classPrivateFieldGet(this, _property).effect(effect);
+          _classPrivateFieldGet(this, _property).effect(effect);
         }
       } catch (err) {
         _iterator.e(err);
@@ -1345,18 +2295,18 @@ var Life = /*#__PURE__*/function () {
   }, {
     key: "doEvent",
     value: function doEvent(eventId) {
-      var _classPrivateFieldGet3 = life_classPrivateFieldGet(this, _event)["do"](eventId, life_classPrivateFieldGet(this, _property)),
+      var _classPrivateFieldGet3 = _classPrivateFieldGet(this, _event)["do"](eventId, _classPrivateFieldGet(this, _property)),
           effect = _classPrivateFieldGet3.effect,
           next = _classPrivateFieldGet3.next,
           description = _classPrivateFieldGet3.description,
           postEvent = _classPrivateFieldGet3.postEvent;
 
-      life_classPrivateFieldGet(this, _property).change(life_classPrivateFieldGet(this, _property).TYPES.EVT, eventId);
+      _classPrivateFieldGet(this, _property).change(_classPrivateFieldGet(this, _property).TYPES.EVT, eventId);
 
-      life_classPrivateFieldGet(this, _property).effect(effect);
+      _classPrivateFieldGet(this, _property).effect(effect);
 
       var content = {
-        type: life_classPrivateFieldGet(this, _property).TYPES.EVT,
+        type: _classPrivateFieldGet(this, _property).TYPES.EVT,
         description: description,
         postEvent: postEvent
       };
@@ -1369,10 +2319,10 @@ var Life = /*#__PURE__*/function () {
       var _this2 = this;
 
       events = events.filter(function (_ref) {
-        var _ref2 = life_slicedToArray(_ref, 1),
+        var _ref2 = _slicedToArray(_ref, 1),
             eventId = _ref2[0];
 
-        return life_classPrivateFieldGet(_this2, _event).check(eventId, life_classPrivateFieldGet(_this2, _property));
+        return _classPrivateFieldGet(_this2, _event).check(eventId, _classPrivateFieldGet(_this2, _property));
       });
       var totalWeights = 0;
 
@@ -1381,7 +2331,7 @@ var Life = /*#__PURE__*/function () {
 
       try {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-          var _step2$value = life_slicedToArray(_step2.value, 2),
+          var _step2$value = _slicedToArray(_step2.value, 2),
               weight = _step2$value[1];
 
           totalWeights += weight;
@@ -1399,7 +2349,7 @@ var Life = /*#__PURE__*/function () {
 
       try {
         for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
-          var _step3$value = life_slicedToArray(_step3.value, 2),
+          var _step3$value = _slicedToArray(_step3.value, 2),
               eventId = _step3$value[0],
               _weight = _step3$value[1];
 
@@ -1416,7 +2366,7 @@ var Life = /*#__PURE__*/function () {
   }, {
     key: "talentRandom",
     value: function talentRandom() {
-      return life_classPrivateFieldGet(this, _talent).talentRandom(JSON.parse(localStorage.extendTalent || 'null'));
+      return _classPrivateFieldGet(this, _talent).talentRandom(JSON.parse(localStorage.extendTalent || 'null'));
     }
   }, {
     key: "talentExtend",
@@ -1426,12 +2376,12 @@ var Life = /*#__PURE__*/function () {
   }, {
     key: "getRecord",
     value: function getRecord() {
-      return life_classPrivateFieldGet(this, _property).getRecord();
+      return _classPrivateFieldGet(this, _property).getRecord();
     }
   }, {
     key: "exclusive",
     value: function exclusive(talents, _exclusive) {
-      return life_classPrivateFieldGet(this, _talent).exclusive(talents, _exclusive);
+      return _classPrivateFieldGet(this, _talent).exclusive(talents, _exclusive);
     }
   }]);
 
@@ -1440,35 +2390,23 @@ var Life = /*#__PURE__*/function () {
 
 /* harmony default export */ const life = (Life);
 ;// CONCATENATED MODULE: ./src/app.js
+
+
+
+
+
+
 function app_createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = app_unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
 function app_unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return app_arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return app_arrayLikeToArray(o, minLen); }
 
 function app_arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-function app_asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
-function app_asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { app_asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { app_asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
-function app_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function app_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function app_createClass(Constructor, protoProps, staticProps) { if (protoProps) app_defineProperties(Constructor.prototype, protoProps); if (staticProps) app_defineProperties(Constructor, staticProps); return Constructor; }
 
 function app_classPrivateFieldInitSpec(obj, privateMap, value) { app_checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
 
 function app_checkPrivateRedeclaration(obj, privateCollection) { if (privateCollection.has(obj)) { throw new TypeError("Cannot initialize the same private elements twice on an object"); } }
-
-function app_classPrivateFieldGet(receiver, privateMap) { var descriptor = app_classExtractFieldDescriptor(receiver, privateMap, "get"); return app_classApplyDescriptorGet(receiver, descriptor); }
-
-function app_classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
-
-function app_classPrivateFieldSet(receiver, privateMap, value) { var descriptor = app_classExtractFieldDescriptor(receiver, privateMap, "set"); app_classApplyDescriptorSet(receiver, descriptor, value); return value; }
-
-function app_classExtractFieldDescriptor(receiver, privateMap, action) { if (!privateMap.has(receiver)) { throw new TypeError("attempted to " + action + " private field on non-instance"); } return privateMap.get(receiver); }
-
-function app_classApplyDescriptorSet(receiver, descriptor, value) { if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } }
 
 
 
@@ -1490,7 +2428,7 @@ var _hintTimeout = /*#__PURE__*/new WeakMap();
 
 var App = /*#__PURE__*/function () {
   function App() {
-    app_classCallCheck(this, App);
+    _classCallCheck(this, App);
 
     app_classPrivateFieldInitSpec(this, _life, {
       writable: true,
@@ -1527,23 +2465,23 @@ var App = /*#__PURE__*/function () {
       value: void 0
     });
 
-    app_classPrivateFieldSet(this, _life, new life());
+    _classPrivateFieldSet(this, _life, new life());
   }
 
-  app_createClass(App, [{
+  _createClass(App, [{
     key: "initial",
     value: function () {
-      var _initial = app_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+      var _initial = _asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee() {
         var _this = this;
 
-        return regeneratorRuntime.wrap(function _callee$(_context) {
+        return regenerator.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
                 this.initPages();
                 this["switch"]('loading');
                 _context.next = 4;
-                return app_classPrivateFieldGet(this, _life).initial();
+                return _classPrivateFieldGet(this, _life).initial();
 
               case 4:
                 this["switch"]('index');
@@ -1595,28 +2533,28 @@ var App = /*#__PURE__*/function () {
         talentPage.find('#random').hide();
         var ul = talentPage.find('#talents');
 
-        app_classPrivateFieldGet(_this2, _life).talentRandom().forEach(function (talent) {
+        _classPrivateFieldGet(_this2, _life).talentRandom().forEach(function (talent) {
           var li = createTalent(talent);
           ul.append(li);
           li.click(function () {
             if (li.hasClass('selected')) {
               li.removeClass('selected');
 
-              app_classPrivateFieldGet(_this2, _talentSelected)["delete"](talent);
+              _classPrivateFieldGet(_this2, _talentSelected)["delete"](talent);
             } else {
-              if (app_classPrivateFieldGet(_this2, _talentSelected).size == 3) {
+              if (_classPrivateFieldGet(_this2, _talentSelected).size == 3) {
                 _this2.hint('只能选3个天赋');
 
                 return;
               }
 
-              var exclusive = app_classPrivateFieldGet(_this2, _life).exclusive(Array.from(app_classPrivateFieldGet(_this2, _talentSelected)).map(function (_ref2) {
+              var exclusive = _classPrivateFieldGet(_this2, _life).exclusive(Array.from(_classPrivateFieldGet(_this2, _talentSelected)).map(function (_ref2) {
                 var id = _ref2.id;
                 return id;
               }), talent.id);
 
               if (exclusive != null) {
-                var _iterator = app_createForOfIteratorHelper(app_classPrivateFieldGet(_this2, _talentSelected)),
+                var _iterator = app_createForOfIteratorHelper(_classPrivateFieldGet(_this2, _talentSelected)),
                     _step;
 
                 try {
@@ -1642,19 +2580,19 @@ var App = /*#__PURE__*/function () {
 
               li.addClass('selected');
 
-              app_classPrivateFieldGet(_this2, _talentSelected).add(talent);
+              _classPrivateFieldGet(_this2, _talentSelected).add(talent);
             }
           });
         });
       });
       talentPage.find('#next').click(function () {
-        if (app_classPrivateFieldGet(_this2, _talentSelected).size != 3) {
+        if (_classPrivateFieldGet(_this2, _talentSelected).size != 3) {
           _this2.hint('请选择3个天赋');
 
           return;
         }
 
-        app_classPrivateFieldSet(_this2, _totalMax, 20 + app_classPrivateFieldGet(_this2, _life).getTalentAllocationAddition(Array.from(app_classPrivateFieldGet(_this2, _talentSelected)).map(function (_ref3) {
+        _classPrivateFieldSet(_this2, _totalMax, 20 + _classPrivateFieldGet(_this2, _life).getTalentAllocationAddition(Array.from(_classPrivateFieldGet(_this2, _talentSelected)).map(function (_ref3) {
           var id = _ref3.id;
           return id;
         })));
@@ -1676,7 +2614,7 @@ var App = /*#__PURE__*/function () {
       };
 
       var freshTotal = function freshTotal() {
-        propertyPage.find('#total').text("\u53EF\u7528\u5C5E\u6027\u70B9\uFF1A".concat(app_classPrivateFieldGet(_this2, _totalMax) - total()));
+        propertyPage.find('#total').text("\u53EF\u7528\u5C5E\u6027\u70B9\uFF1A".concat(_classPrivateFieldGet(_this2, _totalMax) - total()));
       };
 
       var getBtnGroups = function getBtnGroups(name, min, max) {
@@ -1704,7 +2642,7 @@ var App = /*#__PURE__*/function () {
         };
 
         btnAdd.click(function () {
-          if (total() == app_classPrivateFieldGet(_this2, _totalMax)) {
+          if (total() == _classPrivateFieldGet(_this2, _totalMax)) {
             _this2.hint('没用可分配的点数了');
 
             return;
@@ -1719,8 +2657,8 @@ var App = /*#__PURE__*/function () {
           var t = total();
           var val = get();
 
-          if (t > app_classPrivateFieldGet(_this2, _totalMax)) {
-            val -= t - app_classPrivateFieldGet(_this2, _totalMax);
+          if (t > _classPrivateFieldGet(_this2, _totalMax)) {
+            val -= t - _classPrivateFieldGet(_this2, _totalMax);
           }
 
           val = limit(val);
@@ -1753,7 +2691,7 @@ var App = /*#__PURE__*/function () {
       }
 
       propertyPage.find('#random').click(function () {
-        var t = app_classPrivateFieldGet(_this2, _totalMax);
+        var t = _classPrivateFieldGet(_this2, _totalMax);
 
         var arr = [10, 10, 10, 10];
 
@@ -1775,19 +2713,19 @@ var App = /*#__PURE__*/function () {
         groups.MNY.set(10 - arr[3]);
       });
       propertyPage.find('#start').click(function () {
-        if (total() != app_classPrivateFieldGet(_this2, _totalMax)) {
-          _this2.hint("\u4F60\u8FD8\u6709".concat(app_classPrivateFieldGet(_this2, _totalMax) - total(), "\u5C5E\u6027\u70B9\u6CA1\u6709\u5206\u914D\u5B8C"));
+        if (total() != _classPrivateFieldGet(_this2, _totalMax)) {
+          _this2.hint("\u4F60\u8FD8\u6709".concat(_classPrivateFieldGet(_this2, _totalMax) - total(), "\u5C5E\u6027\u70B9\u6CA1\u6709\u5206\u914D\u5B8C"));
 
           return;
         }
 
-        app_classPrivateFieldGet(_this2, _life).restart({
+        _classPrivateFieldGet(_this2, _life).restart({
           CHR: groups.CHR.get(),
           INT: groups.INT.get(),
           STR: groups.STR.get(),
           MNY: groups.MNY.get(),
           SPR: 5,
-          TLT: Array.from(app_classPrivateFieldGet(_this2, _talentSelected)).map(function (_ref4) {
+          TLT: Array.from(_classPrivateFieldGet(_this2, _talentSelected)).map(function (_ref4) {
             var id = _ref4.id;
             return id;
           })
@@ -1795,14 +2733,14 @@ var App = /*#__PURE__*/function () {
 
         _this2["switch"]('trajectory');
 
-        app_classPrivateFieldGet(_this2, _pages).trajectory.born();
+        _classPrivateFieldGet(_this2, _pages).trajectory.born();
       }); // Trajectory
 
       var trajectoryPage = $("\n        <div id=\"main\">\n            <ul id=\"lifeTrajectory\" class=\"lifeTrajectory\"></ul>\n            <button id=\"summary\" class=\"mainbtn\" style=\"top:auto; bottom:0.1rem\">\u4EBA\u751F\u603B\u7ED3</button>\n        </div>\n        ");
       trajectoryPage.find('#lifeTrajectory').click(function () {
-        if (app_classPrivateFieldGet(_this2, _isEnd)) return;
+        if (_classPrivateFieldGet(_this2, _isEnd)) return;
 
-        var trajectory = app_classPrivateFieldGet(_this2, _life).next();
+        var trajectory = _classPrivateFieldGet(_this2, _life).next();
 
         var age = trajectory.age,
             content = trajectory.content,
@@ -1826,7 +2764,7 @@ var App = /*#__PURE__*/function () {
         $("#lifeTrajectory").scrollTop($("#lifeTrajectory")[0].scrollHeight);
 
         if (isEnd) {
-          app_classPrivateFieldSet(_this2, _isEnd, true);
+          _classPrivateFieldSet(_this2, _isEnd, true);
 
           trajectoryPage.find('#summary').show();
         }
@@ -1839,20 +2777,20 @@ var App = /*#__PURE__*/function () {
       summaryPage.find('#again').click(function () {
         _this2.times++;
 
-        app_classPrivateFieldGet(_this2, _life).talentExtend(app_classPrivateFieldGet(_this2, _selectedExtendTalent));
+        _classPrivateFieldGet(_this2, _life).talentExtend(_classPrivateFieldGet(_this2, _selectedExtendTalent));
 
-        app_classPrivateFieldSet(_this2, _selectedExtendTalent, null);
+        _classPrivateFieldSet(_this2, _selectedExtendTalent, null);
 
-        app_classPrivateFieldGet(_this2, _talentSelected).clear();
+        _classPrivateFieldGet(_this2, _talentSelected).clear();
 
-        app_classPrivateFieldSet(_this2, _totalMax, 20);
+        _classPrivateFieldSet(_this2, _totalMax, 20);
 
-        app_classPrivateFieldSet(_this2, _isEnd, false);
+        _classPrivateFieldSet(_this2, _isEnd, false);
 
         _this2["switch"]('index');
       });
 
-      app_classPrivateFieldSet(this, _pages, {
+      _classPrivateFieldSet(this, _pages, {
         loading: {
           page: loadingPage,
           clear: function clear() {}
@@ -1886,7 +2824,7 @@ var App = /*#__PURE__*/function () {
             talentPage.find('ul.selectlist').empty();
             talentPage.find('#random').show();
 
-            app_classPrivateFieldSet(_this2, _totalMax, 20);
+            _classPrivateFieldSet(_this2, _totalMax, 20);
           }
         },
         property: {
@@ -1901,7 +2839,7 @@ var App = /*#__PURE__*/function () {
             trajectoryPage.find('#lifeTrajectory').empty();
             trajectoryPage.find('#summary').hide();
 
-            app_classPrivateFieldSet(_this2, _isEnd, false);
+            _classPrivateFieldSet(_this2, _isEnd, false);
           },
           born: function born() {
             trajectoryPage.find('#lifeTrajectory').trigger("click");
@@ -1915,27 +2853,27 @@ var App = /*#__PURE__*/function () {
             judge.empty();
             talents.empty();
 
-            app_classPrivateFieldGet(_this2, _talentSelected).forEach(function (talent) {
+            _classPrivateFieldGet(_this2, _talentSelected).forEach(function (talent) {
               var li = createTalent(talent);
               talents.append(li);
               li.click(function () {
                 if (li.hasClass('selected')) {
-                  app_classPrivateFieldSet(_this2, _selectedExtendTalent, null);
+                  _classPrivateFieldSet(_this2, _selectedExtendTalent, null);
 
                   li.removeClass('selected');
-                } else if (app_classPrivateFieldGet(_this2, _selectedExtendTalent) != null) {
+                } else if (_classPrivateFieldGet(_this2, _selectedExtendTalent) != null) {
                   _this2.hint('只能继承一个天赋');
 
                   return;
                 } else {
-                  app_classPrivateFieldSet(_this2, _selectedExtendTalent, talent.id);
+                  _classPrivateFieldSet(_this2, _selectedExtendTalent, talent.id);
 
                   li.addClass('selected');
                 }
               });
             });
 
-            var records = app_classPrivateFieldGet(_this2, _life).getRecord();
+            var records = _classPrivateFieldGet(_this2, _life).getRecord();
 
             var s = function s(type, func) {
               var value = func(records.map(function (_ref6) {
@@ -2021,7 +2959,7 @@ var App = /*#__PURE__*/function () {
   }, {
     key: "switch",
     value: function _switch(page) {
-      var p = app_classPrivateFieldGet(this, _pages)[page];
+      var p = _classPrivateFieldGet(this, _pages)[page];
 
       if (!p) return;
       $('#main').detach();
@@ -2035,10 +2973,10 @@ var App = /*#__PURE__*/function () {
 
       var type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'info';
 
-      if (app_classPrivateFieldGet(this, _hintTimeout)) {
-        clearTimeout(app_classPrivateFieldGet(this, _hintTimeout));
+      if (_classPrivateFieldGet(this, _hintTimeout)) {
+        clearTimeout(_classPrivateFieldGet(this, _hintTimeout));
 
-        app_classPrivateFieldSet(this, _hintTimeout, null);
+        _classPrivateFieldSet(this, _hintTimeout, null);
       }
 
       hideBanners();
@@ -2048,7 +2986,7 @@ var App = /*#__PURE__*/function () {
         banner.find('.banner-message').text(message);
 
         if (type != 'error') {
-          app_classPrivateFieldSet(_this3, _hintTimeout, setTimeout(hideBanners, 3000));
+          _classPrivateFieldSet(_this3, _hintTimeout, setTimeout(hideBanners, 3000));
         }
       });
     }
@@ -2070,5 +3008,7 @@ var App = /*#__PURE__*/function () {
 
 var main_app = new app();
 main_app.initial();
+})();
+
 /******/ })()
 ;
