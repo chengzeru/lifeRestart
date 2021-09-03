@@ -110,7 +110,9 @@
     document.getElementsByTagName('head')[0].appendChild(script);
 
   }
-  window.timestamp = await axios(`../dist/timestamp?t=` + Date.now()).data;
+  (async () => {
+    window.timestamp = await axios(`../dist/timestamp?t=` + Date.now()).data;
+  })();
   loadJS("../dist/dist.js?t=" + Date.now(), function () {
   })
 </script>
