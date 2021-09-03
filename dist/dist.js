@@ -7455,6 +7455,7 @@ function app_checkPrivateRedeclaration(obj, privateCollection) { if (privateColl
 
 
 var talentNum = 8;
+var pointNum = 40;
 
 var _life = /*#__PURE__*/new WeakMap();
 
@@ -7491,7 +7492,7 @@ var App = /*#__PURE__*/function () {
 
     app_classPrivateFieldInitSpec(this, _totalMax, {
       writable: true,
-      value: 20
+      value: pointNum
     });
 
     app_classPrivateFieldInitSpec(this, _isEnd, {
@@ -7564,7 +7565,7 @@ var App = /*#__PURE__*/function () {
         return _this2.hint('别卷了！没有排行榜');
       }); // Talent
 
-      var talentPage = $("\n        <div id=\"main\">\n            <div class=\"head\" style=\"font-size: 1.6rem\">\u5929\u8D4B\u62BD\u5361</div>\n            <button id=\"random\" class=\"mainbtn\" style=\"top: 50%;\">10\u8FDE\u62BD\uFF01</button>\n            <ul id=\"talents\" class=\"selectlist\"></ul>\n            <button id=\"next\" class=\"mainbtn\" style=\"top:auto; bottom:0.1em\">\u8BF7\u9009\u62E93\u4E2A</button>\n        </div>\n        ");
+      var talentPage = $("\n        <div id=\"main\">\n            <div class=\"head\" style=\"font-size: 1.6rem\">\u5929\u8D4B\u62BD\u5361</div>\n            <button id=\"random\" class=\"mainbtn\" style=\"top: 50%;\">10\u8FDE\u62BD\uFF01</button>\n            <ul id=\"talents\" class=\"selectlist\"></ul>\n            <button id=\"next\" class=\"mainbtn\" style=\"top:auto; bottom:0.1em\">\u8BF7\u9009\u62E9".concat(talentNum, "\u4E2A</button>\n        </div>\n        "));
 
       var createTalent = function createTalent(_ref) {
         var grade = _ref.grade,
@@ -7636,7 +7637,7 @@ var App = /*#__PURE__*/function () {
           return;
         }
 
-        _classPrivateFieldSet(_this2, _totalMax, talentNum + _classPrivateFieldGet(_this2, _life).getTalentAllocationAddition(Array.from(_classPrivateFieldGet(_this2, _talentSelected)).map(function (_ref3) {
+        _classPrivateFieldSet(_this2, _totalMax, pointNum + _classPrivateFieldGet(_this2, _life).getTalentAllocationAddition(Array.from(_classPrivateFieldGet(_this2, _talentSelected)).map(function (_ref3) {
           var id = _ref3.id;
           return id;
         })));
