@@ -34,7 +34,7 @@ class App {
         const loadingPage = $(`
         <div id="main">
             <div id="title">
-                人生重开模拟器——我是人上人<br>
+                人生重开模拟器<br>我是人上人<br>
                 <div style="font-size:1.5rem; font-weight:normal;">加载中...</div>
             </div>
         </div>
@@ -46,7 +46,7 @@ class App {
             <div id="cnt" class="head">已重开1次</div>
             <button id="rank">排行榜</button>
             <div id="title">
-                人生重开模拟器——我是人上人<br>
+                人生重开模拟器<br>我是人上人<br>
                 <div style="font-size:1.5rem; font-weight:normal;">爽文yyds</div>
             </div>
             <button id="restart" class="mainbtn"><span class="iconfont">&#xe6a7;</span>立即重开</button>
@@ -65,7 +65,7 @@ class App {
         const talentPage = $(`
         <div id="main">
             <div class="head" style="font-size: 1.6rem">天赋抽卡</div>
-            <button id="random" class="mainbtn" style="top: 50%;">10连抽！</button>
+            <button id="random" class="mainbtn" style="top: 50%;">30连抽！</button>
             <ul id="talents" class="selectlist"></ul>
             <button id="next" class="mainbtn" style="top:auto; bottom:0.1em">请选择${talentNum}个</button>
         </div>
@@ -312,7 +312,7 @@ class App {
                 this.#life.talentExtend(this.#selectedExtendTalent);
                 this.#selectedExtendTalent = null;
                 this.#talentSelected.clear();
-                this.#totalMax = 40;
+                this.#totalMax = pointNum;
                 this.#isEnd = false;
                 this.switch('index');
             });
@@ -350,7 +350,7 @@ class App {
                 clear: () => {
                     talentPage.find('ul.selectlist').empty();
                     talentPage.find('#random').show();
-                    this.#totalMax = 20;
+                    this.#totalMax = pointNum;
                 },
             },
             property: {

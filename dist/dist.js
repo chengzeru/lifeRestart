@@ -7555,9 +7555,9 @@ var App = /*#__PURE__*/function () {
       var _this2 = this;
 
       // Loading
-      var loadingPage = $("\n        <div id=\"main\">\n            <div id=\"title\">\n                \u4EBA\u751F\u91CD\u5F00\u6A21\u62DF\u5668\u2014\u2014\u6211\u662F\u4EBA\u4E0A\u4EBA<br>\n                <div style=\"font-size:1.5rem; font-weight:normal;\">\u52A0\u8F7D\u4E2D...</div>\n            </div>\n        </div>\n        "); // Index
+      var loadingPage = $("\n        <div id=\"main\">\n            <div id=\"title\">\n                \u4EBA\u751F\u91CD\u5F00\u6A21\u62DF\u5668<br>\u6211\u662F\u4EBA\u4E0A\u4EBA<br>\n                <div style=\"font-size:1.5rem; font-weight:normal;\">\u52A0\u8F7D\u4E2D...</div>\n            </div>\n        </div>\n        "); // Index
 
-      var indexPage = $("\n        <div id=\"main\">\n            <div id=\"cnt\" class=\"head\">\u5DF2\u91CD\u5F001\u6B21</div>\n            <button id=\"rank\">\u6392\u884C\u699C</button>\n            <div id=\"title\">\n                \u4EBA\u751F\u91CD\u5F00\u6A21\u62DF\u5668\u2014\u2014\u6211\u662F\u4EBA\u4E0A\u4EBA<br>\n                <div style=\"font-size:1.5rem; font-weight:normal;\">\u723D\u6587yyds</div>\n            </div>\n            <button id=\"restart\" class=\"mainbtn\"><span class=\"iconfont\">&#xe6a7;</span>\u7ACB\u5373\u91CD\u5F00</button>\n        </div>\n        ");
+      var indexPage = $("\n        <div id=\"main\">\n            <div id=\"cnt\" class=\"head\">\u5DF2\u91CD\u5F001\u6B21</div>\n            <button id=\"rank\">\u6392\u884C\u699C</button>\n            <div id=\"title\">\n                \u4EBA\u751F\u91CD\u5F00\u6A21\u62DF\u5668<br>\u6211\u662F\u4EBA\u4E0A\u4EBA<br>\n                <div style=\"font-size:1.5rem; font-weight:normal;\">\u723D\u6587yyds</div>\n            </div>\n            <button id=\"restart\" class=\"mainbtn\"><span class=\"iconfont\">&#xe6a7;</span>\u7ACB\u5373\u91CD\u5F00</button>\n        </div>\n        ");
       indexPage.find('#restart').click(function () {
         return _this2.switch('talent');
       });
@@ -7565,7 +7565,7 @@ var App = /*#__PURE__*/function () {
         return _this2.hint('别卷了！没有排行榜');
       }); // Talent
 
-      var talentPage = $("\n        <div id=\"main\">\n            <div class=\"head\" style=\"font-size: 1.6rem\">\u5929\u8D4B\u62BD\u5361</div>\n            <button id=\"random\" class=\"mainbtn\" style=\"top: 50%;\">10\u8FDE\u62BD\uFF01</button>\n            <ul id=\"talents\" class=\"selectlist\"></ul>\n            <button id=\"next\" class=\"mainbtn\" style=\"top:auto; bottom:0.1em\">\u8BF7\u9009\u62E9".concat(talentNum, "\u4E2A</button>\n        </div>\n        "));
+      var talentPage = $("\n        <div id=\"main\">\n            <div class=\"head\" style=\"font-size: 1.6rem\">\u5929\u8D4B\u62BD\u5361</div>\n            <button id=\"random\" class=\"mainbtn\" style=\"top: 50%;\">30\u8FDE\u62BD\uFF01</button>\n            <ul id=\"talents\" class=\"selectlist\"></ul>\n            <button id=\"next\" class=\"mainbtn\" style=\"top:auto; bottom:0.1em\">\u8BF7\u9009\u62E9".concat(talentNum, "\u4E2A</button>\n        </div>\n        "));
 
       var createTalent = function createTalent(_ref) {
         var grade = _ref.grade,
@@ -7832,7 +7832,7 @@ var App = /*#__PURE__*/function () {
 
         _classPrivateFieldGet(_this2, _talentSelected).clear();
 
-        _classPrivateFieldSet(_this2, _totalMax, 40);
+        _classPrivateFieldSet(_this2, _totalMax, pointNum);
 
         _classPrivateFieldSet(_this2, _isEnd, false);
 
@@ -7873,7 +7873,7 @@ var App = /*#__PURE__*/function () {
             talentPage.find('ul.selectlist').empty();
             talentPage.find('#random').show();
 
-            _classPrivateFieldSet(_this2, _totalMax, 20);
+            _classPrivateFieldSet(_this2, _totalMax, pointNum);
           }
         },
         property: {
