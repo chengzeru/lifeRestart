@@ -2030,7 +2030,7 @@ var Talent = /*#__PURE__*/function () {
         });
       }
 
-      return new Array(10).fill(1).map(function (v, i) {
+      return new Array(30).fill(1).map(function (v, i) {
         if (!i && include) return include;
         var gradeRandom = Math.random();
         var grade;
@@ -2411,6 +2411,7 @@ function app_checkPrivateRedeclaration(obj, privateCollection) { if (privateColl
 
 
 
+var talentNum = 10;
 
 var _life = /*#__PURE__*/new WeakMap();
 
@@ -2510,9 +2511,9 @@ var App = /*#__PURE__*/function () {
       var _this2 = this;
 
       // Loading
-      var loadingPage = $("\n        <div id=\"main\">\n            <div id=\"title\">\n                \u4EBA\u751F\u91CD\u5F00\u6A21\u62DF\u5668<br>\n                <div style=\"font-size:1.5rem; font-weight:normal;\">\u52A0\u8F7D\u4E2D...</div>\n            </div>\n        </div>\n        "); // Index
+      var loadingPage = $("\n        <div id=\"main\">\n            <div id=\"title\">\n                \u4EBA\u751F\u91CD\u5F00\u6A21\u62DF\u5668\u2014\u2014\u6211\u662F\u4EBA\u4E0A\u4EBA<br>\n                <div style=\"font-size:1.5rem; font-weight:normal;\">\u52A0\u8F7D\u4E2D...</div>\n            </div>\n        </div>\n        "); // Index
 
-      var indexPage = $("\n        <div id=\"main\">\n            <div id=\"cnt\" class=\"head\">\u5DF2\u91CD\u5F001\u6B21</div>\n            <button id=\"rank\">\u6392\u884C\u699C</button>\n            <div id=\"title\">\n                \u4EBA\u751F\u91CD\u5F00\u6A21\u62DF\u5668<br>\n                <div style=\"font-size:1.5rem; font-weight:normal;\">\u8FD9\u5783\u573E\u4EBA\u751F\u4E00\u79D2\u4E5F\u4E0D\u60F3\u5446\u4E86</div>\n            </div>\n            <button id=\"restart\" class=\"mainbtn\"><span class=\"iconfont\">&#xe6a7;</span>\u7ACB\u5373\u91CD\u5F00</button>\n        </div>\n        ");
+      var indexPage = $("\n        <div id=\"main\">\n            <div id=\"cnt\" class=\"head\">\u5DF2\u91CD\u5F001\u6B21</div>\n            <button id=\"rank\">\u6392\u884C\u699C</button>\n            <div id=\"title\">\n                \u4EBA\u751F\u91CD\u5F00\u6A21\u62DF\u5668\u2014\u2014\u6211\u662F\u4EBA\u4E0A\u4EBA<br>\n                <div style=\"font-size:1.5rem; font-weight:normal;\">\u8FD9\u5783\u573E\u4EBA\u751F\u4E00\u79D2\u4E5F\u4E0D\u60F3\u5446\u4E86</div>\n            </div>\n            <button id=\"restart\" class=\"mainbtn\"><span class=\"iconfont\">&#xe6a7;</span>\u7ACB\u5373\u91CD\u5F00</button>\n        </div>\n        ");
       indexPage.find('#restart').click(function () {
         return _this2["switch"]('talent');
       });
@@ -2542,8 +2543,8 @@ var App = /*#__PURE__*/function () {
 
               _classPrivateFieldGet(_this2, _talentSelected)["delete"](talent);
             } else {
-              if (_classPrivateFieldGet(_this2, _talentSelected).size == 3) {
-                _this2.hint('只能选3个天赋');
+              if (_classPrivateFieldGet(_this2, _talentSelected).size == talentNum) {
+                _this2.hint('请选择' + talentNum + '个天赋');
 
                 return;
               }
@@ -2586,13 +2587,13 @@ var App = /*#__PURE__*/function () {
         });
       });
       talentPage.find('#next').click(function () {
-        if (_classPrivateFieldGet(_this2, _talentSelected).size != 3) {
-          _this2.hint('请选择3个天赋');
+        if (_classPrivateFieldGet(_this2, _talentSelected).size != talentNum) {
+          _this2.hint('请选择' + talentNum + '个天赋');
 
           return;
         }
 
-        _classPrivateFieldSet(_this2, _totalMax, 20 + _classPrivateFieldGet(_this2, _life).getTalentAllocationAddition(Array.from(_classPrivateFieldGet(_this2, _talentSelected)).map(function (_ref3) {
+        _classPrivateFieldSet(_this2, _totalMax, 100 + _classPrivateFieldGet(_this2, _life).getTalentAllocationAddition(Array.from(_classPrivateFieldGet(_this2, _talentSelected)).map(function (_ref3) {
           var id = _ref3.id;
           return id;
         })));
@@ -2643,7 +2644,7 @@ var App = /*#__PURE__*/function () {
 
         btnAdd.click(function () {
           if (total() == _classPrivateFieldGet(_this2, _totalMax)) {
-            _this2.hint('没用可分配的点数了');
+            _this2.hint('没有可分配的点数了');
 
             return;
           }
@@ -2676,13 +2677,13 @@ var App = /*#__PURE__*/function () {
         };
       };
 
-      groups.CHR = getBtnGroups("颜值", 0, 10); // 颜值 charm CHR
+      groups.CHR = getBtnGroups("颜值", 0, 50); // 颜值 charm CHR
 
-      groups.INT = getBtnGroups("智力", 0, 10); // 智力 intelligence INT
+      groups.INT = getBtnGroups("智力", 0, 50); // 智力 intelligence INT
 
-      groups.STR = getBtnGroups("体质", 0, 10); // 体质 strength STR
+      groups.STR = getBtnGroups("体质", 0, 50); // 体质 strength STR
 
-      groups.MNY = getBtnGroups("家境", 0, 10); // 家境 money MNY
+      groups.MNY = getBtnGroups("家境", 0, 50); // 家境 money MNY
 
       var ul = propertyPage.find('#propertyAllocation');
 
@@ -2691,6 +2692,10 @@ var App = /*#__PURE__*/function () {
       }
 
       propertyPage.find('#random').click(function () {
+        _this2.hint('人上人请自己选哦');
+
+        return;
+
         var t = _classPrivateFieldGet(_this2, _totalMax);
 
         var arr = [10, 10, 10, 10];
@@ -2713,12 +2718,10 @@ var App = /*#__PURE__*/function () {
         groups.MNY.set(10 - arr[3]);
       });
       propertyPage.find('#start').click(function () {
-        if (total() != _classPrivateFieldGet(_this2, _totalMax)) {
-          _this2.hint("\u4F60\u8FD8\u6709".concat(_classPrivateFieldGet(_this2, _totalMax) - total(), "\u5C5E\u6027\u70B9\u6CA1\u6709\u5206\u914D\u5B8C"));
-
-          return;
-        }
-
+        /* if (total() != this.#totalMax) {
+            this.hint(`你还有${this.#totalMax - total()}属性点没有分配完`);
+            return;
+        } */
         _classPrivateFieldGet(_this2, _life).restart({
           CHR: groups.CHR.get(),
           INT: groups.INT.get(),
