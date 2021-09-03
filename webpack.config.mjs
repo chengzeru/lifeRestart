@@ -1,7 +1,7 @@
 import path from "path";
 
 export default {
-    entry: './src/app.js',
+    entry: './src/main.js',
     output: {
         filename: 'dist.js',
         path: path.resolve(path.resolve(), 'dist'),

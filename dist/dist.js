@@ -2,7 +2,78 @@
 /******/ 	"use strict";
 var __webpack_exports__ = {};
 
-// UNUSED EXPORTS: default
+;// CONCATENATED MODULE: ./src/functions/util.js
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function clone(value) {
+  switch (_typeof(value)) {
+    case 'object':
+      if (Array.isArray(value)) return value.map(function (v) {
+        return clone(v);
+      });
+      var newObj = {};
+
+      for (var key in value) {
+        newObj[key] = clone(value[key]);
+      }
+
+      return newObj;
+
+    default:
+      return value;
+  }
+}
+
+function max() {
+  for (var _len = arguments.length, arr = new Array(_len), _key = 0; _key < _len; _key++) {
+    arr[_key] = arguments[_key];
+  }
+
+  return Math.max.apply(Math, _toConsumableArray(arr.flat()));
+}
+
+function min() {
+  for (var _len2 = arguments.length, arr = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+    arr[_key2] = arguments[_key2];
+  }
+
+  return Math.min.apply(Math, _toConsumableArray(arr.flat()));
+}
+
+function sum() {
+  var s = 0;
+
+  for (var _len3 = arguments.length, arr = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+    arr[_key3] = arguments[_key3];
+  }
+
+  arr.flat().forEach(function (v) {
+    return s += v;
+  });
+  return s;
+}
+
+function average() {
+  for (var _len4 = arguments.length, arr = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+    arr[_key4] = arguments[_key4];
+  }
+
+  var s = sum.apply(void 0, arr);
+  return s / arr.flat().length;
+}
+
 
 ;// CONCATENATED MODULE: ./src/functions/summary.js
 var data = {
@@ -260,7 +331,7 @@ var data = {
   }]
 };
 
-function summary_summary(type, value) {
+function summary(type, value) {
   var length = data[type].length;
 
   while (length--) {
@@ -277,11 +348,11 @@ function summary_summary(type, value) {
 
 
 ;// CONCATENATED MODULE: ./src/property.js
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = property_unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function property_unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return property_arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return property_arrayLikeToArray(o, minLen); }
 
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+function property_arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -313,7 +384,7 @@ var _data = /*#__PURE__*/new WeakMap();
 
 var _record = /*#__PURE__*/new WeakMap();
 
-var property_Property = /*#__PURE__*/(/* unused pure expression or super */ null && (function () {
+var Property = /*#__PURE__*/function () {
   function Property() {
     _classCallCheck(this, Property);
 
@@ -525,9 +596,171 @@ var property_Property = /*#__PURE__*/(/* unused pure expression or super */ null
   }]);
 
   return Property;
-}()));
+}();
 
-/* harmony default export */ const property = ((/* unused pure expression or super */ null && (property_Property)));
+/* harmony default export */ const property = (Property);
+;// CONCATENATED MODULE: ./src/functions/condition.js
+function condition_createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = condition_unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function condition_unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return condition_arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return condition_arrayLikeToArray(o, minLen); }
+
+function condition_arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function parseCondition(condition) {
+  var conditions = [];
+  var length = condition.length;
+  var stack = [];
+  stack.unshift(conditions);
+  var cursor = 0;
+
+  var catchString = function catchString(i) {
+    var str = condition.substring(cursor, i).trim();
+    cursor = i;
+    if (str) stack[0].push(str);
+  };
+
+  for (var i = 0; i < length; i++) {
+    switch (condition[i]) {
+      case ' ':
+        continue;
+
+      case '(':
+        catchString(i);
+        cursor++;
+        var sub = [];
+        stack[0].push(sub);
+        stack.unshift(sub);
+        break;
+
+      case ')':
+        catchString(i);
+        cursor++;
+        stack.shift();
+        break;
+
+      case '|':
+      case '&':
+        catchString(i);
+        catchString(i + 1);
+        break;
+
+      default:
+        continue;
+    }
+  }
+
+  catchString(length);
+  return conditions;
+}
+
+function checkCondition(property, condition) {
+  var conditions = parseCondition(condition);
+  return checkParsedConditions(property, conditions);
+}
+
+function checkParsedConditions(property, conditions) {
+  if (!Array.isArray(conditions)) return checkProp(property, conditions);
+  if (conditions.length == 0) return true;
+  if (conditions.length == 1) return checkParsedConditions(property, conditions[0]);
+  var ret = checkParsedConditions(property, conditions[0]);
+
+  for (var i = 1; i < conditions.length; i += 2) {
+    switch (conditions[i]) {
+      case '&':
+        if (ret) ret = checkParsedConditions(property, conditions[i + 1]);
+        break;
+
+      case '|':
+        if (ret) return true;
+        ret = checkParsedConditions(property, conditions[i + 1]);
+        break;
+
+      default:
+        return false;
+    }
+  }
+
+  return ret;
+}
+
+function checkProp(property, condition) {
+  var length = condition.length;
+  var i = condition.search(/[><\!\?=]/);
+  var prop = condition.substring(0, i);
+  var symbol = condition.substring(i, i += condition[i + 1] == '=' ? 2 : 1);
+  var d = condition.substring(i, length);
+  var propData = property.get(prop);
+  var conditionData = d[0] == '[' ? JSON.parse(d) : Number(d);
+
+  switch (symbol) {
+    case '>':
+      return propData > conditionData;
+
+    case '<':
+      return propData < conditionData;
+
+    case '>=':
+      return propData >= conditionData;
+
+    case '<=':
+      return propData <= conditionData;
+
+    case '=':
+      if (Array.isArray(propData)) return propData.includes(conditionData);
+      return propData == conditionData;
+
+    case '!=':
+      if (Array.isArray(propData)) return !propData.includes(conditionData);
+      return propData == conditionData;
+
+    case '?':
+      if (Array.isArray(propData)) {
+        var _iterator = condition_createForOfIteratorHelper(propData),
+            _step;
+
+        try {
+          for (_iterator.s(); !(_step = _iterator.n()).done;) {
+            var p = _step.value;
+            if (conditionData.includes(p)) return true;
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
+        }
+
+        return false;
+      }
+
+      return conditionData.includes(propData);
+
+    case '!':
+      if (Array.isArray(propData)) {
+        var _iterator2 = condition_createForOfIteratorHelper(propData),
+            _step2;
+
+        try {
+          for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+            var _p = _step2.value;
+            if (conditionData.includes(_p)) return false;
+          }
+        } catch (err) {
+          _iterator2.e(err);
+        } finally {
+          _iterator2.f();
+        }
+
+        return true;
+      }
+
+      return !conditionData.includes(propData);
+
+    default:
+      return false;
+  }
+}
+
+
 ;// CONCATENATED MODULE: ./src/event.js
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || event_unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
@@ -568,7 +801,7 @@ function event_classApplyDescriptorSet(receiver, descriptor, value) { if (descri
 
 var _events = /*#__PURE__*/new WeakMap();
 
-var event_Event = /*#__PURE__*/(/* unused pure expression or super */ null && (function () {
+var Event = /*#__PURE__*/function () {
   function Event() {
     event_classCallCheck(this, Event);
 
@@ -667,9 +900,9 @@ var event_Event = /*#__PURE__*/(/* unused pure expression or super */ null && (f
   }]);
 
   return Event;
-}()));
+}();
 
-/* harmony default export */ const src_event = ((/* unused pure expression or super */ null && (event_Event)));
+/* harmony default export */ const src_event = (Event);
 ;// CONCATENATED MODULE: ./src/talent.js
 function talent_createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = talent_unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
@@ -702,7 +935,7 @@ function talent_classApplyDescriptorSet(receiver, descriptor, value) { if (descr
 
 var _talents = /*#__PURE__*/new WeakMap();
 
-var talent_Talent = /*#__PURE__*/(/* unused pure expression or super */ null && (function () {
+var Talent = /*#__PURE__*/function () {
   function Talent() {
     talent_classCallCheck(this, Talent);
 
@@ -889,9 +1122,9 @@ var talent_Talent = /*#__PURE__*/(/* unused pure expression or super */ null && 
   }]);
 
   return Talent;
-}()));
+}();
 
-/* harmony default export */ const talent = ((/* unused pure expression or super */ null && (talent_Talent)));
+/* harmony default export */ const talent = (Talent);
 ;// CONCATENATED MODULE: ./src/life.js
 function life_slicedToArray(arr, i) { return life_arrayWithHoles(arr) || life_iterableToArrayLimit(arr, i) || life_unsupportedIterableToArray(arr, i) || life_nonIterableRest(); }
 
@@ -943,7 +1176,7 @@ var _talent = /*#__PURE__*/new WeakMap();
 
 var _triggerTalents = /*#__PURE__*/new WeakMap();
 
-var life_Life = /*#__PURE__*/(/* unused pure expression or super */ null && (function () {
+var Life = /*#__PURE__*/function () {
   function Life() {
     life_classCallCheck(this, Life);
 
@@ -967,11 +1200,11 @@ var life_Life = /*#__PURE__*/(/* unused pure expression or super */ null && (fun
       value: void 0
     });
 
-    life_classPrivateFieldSet(this, _property, new Property());
+    life_classPrivateFieldSet(this, _property, new property());
 
-    life_classPrivateFieldSet(this, _event, new Event());
+    life_classPrivateFieldSet(this, _event, new src_event());
 
-    life_classPrivateFieldSet(this, _talent, new Talent());
+    life_classPrivateFieldSet(this, _talent, new talent());
   }
 
   life_createClass(Life, [{
@@ -1203,9 +1436,9 @@ var life_Life = /*#__PURE__*/(/* unused pure expression or super */ null && (fun
   }]);
 
   return Life;
-}()));
+}();
 
-/* harmony default export */ const life = ((/* unused pure expression or super */ null && (life_Life)));
+/* harmony default export */ const life = (Life);
 ;// CONCATENATED MODULE: ./src/app.js
 function app_createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = app_unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
@@ -1255,7 +1488,7 @@ var _selectedExtendTalent = /*#__PURE__*/new WeakMap();
 
 var _hintTimeout = /*#__PURE__*/new WeakMap();
 
-var App = /*#__PURE__*/(/* unused pure expression or super */ null && (function () {
+var App = /*#__PURE__*/function () {
   function App() {
     app_classCallCheck(this, App);
 
@@ -1294,7 +1527,7 @@ var App = /*#__PURE__*/(/* unused pure expression or super */ null && (function 
       value: void 0
     });
 
-    app_classPrivateFieldSet(this, _life, new Life());
+    app_classPrivateFieldSet(this, _life, new life());
   }
 
   app_createClass(App, [{
@@ -1830,8 +2063,12 @@ var App = /*#__PURE__*/(/* unused pure expression or super */ null && (function 
   }]);
 
   return App;
-}()));
+}();
 
-/* harmony default export */ const app = ((/* unused pure expression or super */ null && (App)));
+/* harmony default export */ const app = (App);
+;// CONCATENATED MODULE: ./src/main.js
+
+var main_app = new app();
+main_app.initial();
 /******/ })()
 ;
