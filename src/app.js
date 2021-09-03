@@ -48,6 +48,7 @@ class App {
             <div id="title">
                 人生重开模拟器之<br>我是人上人<br>
                 <div style="font-size:1.5rem; font-weight:normal;">爽文yyds</div>
+                <div style="font-size:1rem; font-weight:normal;">${"编译时间：" + window.timestamp}</div>
             </div>
             <button id="restart" class="mainbtn"><span class="iconfont">&#xe6a7;</span>立即重开</button>
         </div>
@@ -59,7 +60,7 @@ class App {
 
         indexPage
             .find('#rank')
-            .click(() => this.hint('别卷了！没有排行榜'));
+            .click(() => this.hint('没有排行榜，人上人是不需要卷的'));
 
         // Talent
         const talentPage = $(`
