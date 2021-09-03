@@ -30,7 +30,7 @@ class App {
         const loadingPage = $(`
         <div id="main">
             <div id="title">
-                人生重开模拟器<br>
+                人生重开模拟器——我是人上人<br>
                 <div style="font-size:1.5rem; font-weight:normal;">加载中...</div>
             </div>
         </div>
@@ -42,7 +42,7 @@ class App {
             <div id="cnt" class="head">已重开1次</div>
             <button id="rank">排行榜</button>
             <div id="title">
-                人生重开模拟器<br>
+                人生重开模拟器——我是人上人<br>
                 <div style="font-size:1.5rem; font-weight:normal;">这垃圾人生一秒也不想呆了</div>
             </div>
             <button id="restart" class="mainbtn"><span class="iconfont">&#xe6a7;</span>立即重开</button>
@@ -117,7 +117,7 @@ class App {
                     this.hint('请选择3个天赋');
                     return;
                 }
-                this.#totalMax = 20 + this.#life.getTalentAllocationAddition(Array.from(this.#talentSelected).map(({ id }) => id));
+                this.#totalMax = 100 + this.#life.getTalentAllocationAddition(Array.from(this.#talentSelected).map(({ id }) => id));
                 this.switch('property');
             })
 

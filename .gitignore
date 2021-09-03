@@ -1,3 +1,6 @@
+~$*.xlsx
+# xlsx temp file
+
 # Logs
 logs
 *.log
