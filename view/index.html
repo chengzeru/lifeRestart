@@ -88,7 +88,8 @@
   };
 </script>
 <script type="module">
-  import App from '../dist/dist.js';
+  var m = "../dist/dist.js?t=" + Date.now();
+  import App from m;
   const app = new App();
   app.initial();
 </script>
