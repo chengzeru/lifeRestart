@@ -17,7 +17,16 @@ export default {
                 use: {
                     loader: 'babel-loader',
                     options: {
-                        presets: ['@babel/preset-env'],
+                        presets: [
+                            ['@babel/preset-env', {
+                                "targets": {
+                                    "chrome": 49,
+                                    "ie": 11,
+                                },
+                                "useBuiltIns": "usage",
+                                "corejs": 3,
+                            }]
+                        ],
                         plugins: ["@babel/plugin-transform-runtime"],
                     }
                 }
