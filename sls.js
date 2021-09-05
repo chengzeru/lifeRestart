@@ -45,4 +45,6 @@ app.use(function (err, req, res, next) {
   res.status(500).send('Internal Serverless Error');
 });
 
+app.binaryTypes = ["font/woff2"];
+
 module.exports = app;
