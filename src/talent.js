@@ -42,7 +42,13 @@ class Talent {
         return null;
     }
 
-    talentRandom(include) {
+    talentRandom(include, num) {
+        if (num == undefined) {
+            num = 30;
+        } else if (num == -1) {
+            num = Object.keys(this.#talents).length;
+        }
+
         // 1000, 100, 10, 1
         const talentList = {};
         for (const talentId in this.#talents) {
@@ -55,15 +61,11 @@ class Talent {
             else talentList[grade].push({ grade, name, description, id });
         }
 
-        return new Array(30)
+        return new Array(num)
             .fill(1).map((v, i) => {
                 if (!i && include) return include;
                 const gradeRandom = Math.random();
-                let grade;
-                if (gradeRandom >= 0.2) grade = 0;
-                else if (gradeRandom >= 0.05) grade = 1;
-                else if (gradeRandom >= 0.01) grade = 2;
-                else grade = 3;
+                let grade = 3;
 
                 while (talentList[grade].length == 0) grade--;
 

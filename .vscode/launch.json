@@ -5,6 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Launch Program",
+            "program": "${workspaceFolder}/web.js",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "pwa-node"
+        },
+        {
             "type": "node",
             "request": "launch",
             "name": "test",
@@ -18,7 +27,9 @@
             "request": "launch",
             "name": "xlsxTransform",
             "program": "${workspaceFolder}/utils/xlsxTransform.js",
-            "args": ["data"],
+            "args": [
+                "data"
+            ],
             "skipFiles": [
                 "<node_internals>/**"
             ]

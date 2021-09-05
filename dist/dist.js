@@ -4025,6 +4025,27 @@ if (isForced(NUMBER, !NativeNumber(' 0o1') || !NativeNumber('0b1') || NativeNumb
 
 /***/ }),
 
+/***/ 7941:
+/***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
+
+var $ = __webpack_require__(2109);
+var toObject = __webpack_require__(7908);
+var nativeKeys = __webpack_require__(1956);
+var fails = __webpack_require__(7293);
+
+var FAILS_ON_PRIMITIVES = fails(function () { nativeKeys(1); });
+
+// `Object.keys` method
+// https://tc39.es/ecma262/#sec-object.keys
+$({ target: 'Object', stat: true, forced: FAILS_ON_PRIMITIVES }, {
+  keys: function keys(it) {
+    return nativeKeys(toObject(it));
+  }
+});
+
+
+/***/ }),
+
 /***/ 1539:
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -6876,6 +6897,8 @@ var Event = /*#__PURE__*/function () {
 }();
 
 /* harmony default export */ const src_event = (Event);
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.object.keys.js
+var es_object_keys = __webpack_require__(7941);
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.fill.js
 var es_array_fill = __webpack_require__(3290);
 ;// CONCATENATED MODULE: ./src/talent.js
@@ -6892,6 +6915,7 @@ function talent_createForOfIteratorHelper(o, allowArrayLike) { var it = typeof S
 function talent_unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return talent_arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return talent_arrayLikeToArray(o, minLen); }
 
 function talent_arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
 
 
 
@@ -7007,8 +7031,14 @@ var Talent = /*#__PURE__*/function () {
     }
   }, {
     key: "talentRandom",
-    value: function talentRandom(include) {
-      // 1000, 100, 10, 1
+    value: function talentRandom(include, num) {
+      if (num == undefined) {
+        num = 30;
+      } else if (num == -1) {
+        num = Object.keys(_classPrivateFieldGet(this, _talents)).length;
+      } // 1000, 100, 10, 1
+
+
       var talentList = {};
 
       for (var talentId in _classPrivateFieldGet(this, _talents)) {
@@ -7041,11 +7071,10 @@ var Talent = /*#__PURE__*/function () {
         });
       }
 
-      return new Array(30).fill(1).map(function (v, i) {
+      return new Array(num).fill(1).map(function (v, i) {
         if (!i && include) return include;
         var gradeRandom = Math.random();
-        var grade;
-        if (gradeRandom >= 0.2) grade = 0;else if (gradeRandom >= 0.05) grade = 1;else if (gradeRandom >= 0.01) grade = 2;else grade = 3;
+        var grade = 3;
 
         while (talentList[grade].length == 0) {
           grade--;
@@ -7390,8 +7419,8 @@ var Life = /*#__PURE__*/function () {
     }
   }, {
     key: "talentRandom",
-    value: function talentRandom() {
-      return _classPrivateFieldGet(this, _talent).talentRandom(JSON.parse(localStorage.extendTalent || 'null'));
+    value: function talentRandom(num) {
+      return _classPrivateFieldGet(this, _talent).talentRandom(JSON.parse(localStorage.extendTalent || 'null'), num);
     }
   }, {
     key: "talentExtend",
@@ -7565,7 +7594,7 @@ var App = /*#__PURE__*/function () {
         return _this2.hint('没有排行榜，人上人是不需要卷的');
       }); // Talent
 
-      var talentPage = $("\n        <div id=\"main\">\n            <div class=\"head\" style=\"font-size: 1.6rem\">\u5929\u8D4B\u62BD\u5361</div>\n            <button id=\"random\" class=\"mainbtn\" style=\"top: 50%;\">30\u8FDE\u62BD\uFF01</button>\n            <ul id=\"talents\" class=\"selectlist\"></ul>\n            <button id=\"next\" class=\"mainbtn\" style=\"top:auto; bottom:0.1em\">\u8BF7\u9009\u62E9".concat(talentNum, "\u4E2A</button>\n        </div>\n        "));
+      var talentPage = $("\n        <div id=\"main\">\n            <div class=\"head\" style=\"font-size: 1.6rem\">\u5929\u8D4B\u62BD\u5361</div>\n            <button id=\"random\" class=\"mainbtn talentbtn\" style=\"top: 40%;\">30\u8FDE\u62BD\uFF01</button>\n            <button id=\"all\" class=\"mainbtn talentbtn\" style=\"top: 60%;\">\u5168\u90E8\u5929\u8D4B\u5361\uFF01</button>\n            <ul id=\"talents\" class=\"selectlist\"></ul>\n            <button id=\"next\" class=\"mainbtn\" style=\"top:auto; bottom:0.1em\">\u8BF7\u9009\u62E9".concat(talentNum, "\u4E2A</button>\n        </div>\n        "));
 
       var createTalent = function createTalent(_ref) {
         var grade = _ref.grade,
@@ -7575,7 +7604,7 @@ var App = /*#__PURE__*/function () {
       };
 
       talentPage.find('#random').click(function () {
-        talentPage.find('#random').hide();
+        talentPage.find('.talentbtn').hide();
         var ul = talentPage.find('#talents');
 
         _classPrivateFieldGet(_this2, _life).talentRandom().forEach(function (talent) {
@@ -7630,6 +7659,62 @@ var App = /*#__PURE__*/function () {
           });
         });
       });
+      talentPage.find('#all').click(function () {
+        talentPage.find('.talentbtn').hide();
+        var ul = talentPage.find('#talents');
+
+        _classPrivateFieldGet(_this2, _life).talentRandom(-1).forEach(function (talent) {
+          var li = createTalent(talent);
+          ul.append(li);
+          li.click(function () {
+            if (li.hasClass('selected')) {
+              li.removeClass('selected');
+
+              _classPrivateFieldGet(_this2, _talentSelected).delete(talent);
+            } else {
+              if (_classPrivateFieldGet(_this2, _talentSelected).size == talentNum) {
+                _this2.hint('请选择' + talentNum + '个天赋');
+
+                return;
+              }
+
+              var exclusive = _classPrivateFieldGet(_this2, _life).exclusive(Array.from(_classPrivateFieldGet(_this2, _talentSelected)).map(function (_ref3) {
+                var id = _ref3.id;
+                return id;
+              }), talent.id);
+
+              if (exclusive != null) {
+                var _iterator2 = app_createForOfIteratorHelper(_classPrivateFieldGet(_this2, _talentSelected)),
+                    _step2;
+
+                try {
+                  for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+                    var _step2$value = _step2.value,
+                        name = _step2$value.name,
+                        id = _step2$value.id;
+
+                    if (id == exclusive) {
+                      _this2.hint("\u4E0E\u5DF2\u9009\u62E9\u7684\u5929\u8D4B\u3010".concat(name, "\u3011\u51B2\u7A81"));
+
+                      return;
+                    }
+                  }
+                } catch (err) {
+                  _iterator2.e(err);
+                } finally {
+                  _iterator2.f();
+                }
+
+                return;
+              }
+
+              li.addClass('selected');
+
+              _classPrivateFieldGet(_this2, _talentSelected).add(talent);
+            }
+          });
+        });
+      });
       talentPage.find('#next').click(function () {
         if (_classPrivateFieldGet(_this2, _talentSelected).size != talentNum) {
           _this2.hint('请选择' + talentNum + '个天赋');
@@ -7637,8 +7722,8 @@ var App = /*#__PURE__*/function () {
           return;
         }
 
-        _classPrivateFieldSet(_this2, _totalMax, pointNum + _classPrivateFieldGet(_this2, _life).getTalentAllocationAddition(Array.from(_classPrivateFieldGet(_this2, _talentSelected)).map(function (_ref3) {
-          var id = _ref3.id;
+        _classPrivateFieldSet(_this2, _totalMax, pointNum + _classPrivateFieldGet(_this2, _life).getTalentAllocationAddition(Array.from(_classPrivateFieldGet(_this2, _talentSelected)).map(function (_ref4) {
+          var id = _ref4.id;
           return id;
         })));
 
@@ -7774,8 +7859,8 @@ var App = /*#__PURE__*/function () {
           STR: groups.STR.get(),
           MNY: groups.MNY.get(),
           SPR: 5,
-          TLT: Array.from(_classPrivateFieldGet(_this2, _talentSelected)).map(function (_ref4) {
-            var id = _ref4.id;
+          TLT: Array.from(_classPrivateFieldGet(_this2, _talentSelected)).map(function (_ref5) {
+            var id = _ref5.id;
             return id;
           })
         });
@@ -7794,12 +7879,12 @@ var App = /*#__PURE__*/function () {
         var age = trajectory.age,
             content = trajectory.content,
             isEnd = trajectory.isEnd;
-        var li = $("<li><span>".concat(age, "\u5C81\uFF1A</span>").concat(content.map(function (_ref5) {
-          var type = _ref5.type,
-              description = _ref5.description,
-              grade = _ref5.grade,
-              name = _ref5.name,
-              postEvent = _ref5.postEvent;
+        var li = $("<li><span>".concat(age, "\u5C81\uFF1A</span>").concat(content.map(function (_ref6) {
+          var type = _ref6.type,
+              description = _ref6.description,
+              grade = _ref6.grade,
+              name = _ref6.name,
+              postEvent = _ref6.postEvent;
 
           switch (type) {
             case 'TLT':
@@ -7925,8 +8010,8 @@ var App = /*#__PURE__*/function () {
             var records = _classPrivateFieldGet(_this2, _life).getRecord();
 
             var s = function s(type, func) {
-              var value = func(records.map(function (_ref6) {
-                var v = _ref6[type];
+              var value = func(records.map(function (_ref7) {
+                var v = _ref7[type];
                 return v;
               }));
 
@@ -7987,8 +8072,8 @@ var App = /*#__PURE__*/function () {
               return "<li class=\"grade".concat(grade, "\"><span>\u4EAB\u5E74\uFF1A</span>").concat(value, " ").concat(judge, "</li>");
             }(), function () {
               var m = function m(type) {
-                return max(records.map(function (_ref7) {
-                  var value = _ref7[type];
+                return max(records.map(function (_ref8) {
+                  var value = _ref8[type];
                   return value;
                 }));
               };

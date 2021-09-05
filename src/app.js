@@ -66,7 +66,8 @@ class App {
         const talentPage = $(`
         <div id="main">
             <div class="head" style="font-size: 1.6rem">天赋抽卡</div>
-            <button id="random" class="mainbtn" style="top: 50%;">30连抽！</button>
+            <button id="random" class="mainbtn talentbtn" style="top: 40%;">30连抽！</button>
+            <button id="all" class="mainbtn talentbtn" style="top: 60%;">全部天赋卡！</button>
             <ul id="talents" class="selectlist"></ul>
             <button id="next" class="mainbtn" style="top:auto; bottom:0.1em">请选择${talentNum}个</button>
         </div>
@@ -79,9 +80,48 @@ class App {
         talentPage
             .find('#random')
             .click(() => {
-                talentPage.find('#random').hide();
+                talentPage.find('.talentbtn').hide();
                 const ul = talentPage.find('#talents');
                 this.#life.talentRandom()
+                    .forEach(talent => {
+                        const li = createTalent(talent);
+                        ul.append(li);
+                        li.click(() => {
+                            if (li.hasClass('selected')) {
+                                li.removeClass('selected')
+                                this.#talentSelected.delete(talent);
+                            } else {
+                                if (this.#talentSelected.size == talentNum) {
+                                    this.hint('请选择' + talentNum + '个天赋');
+                                    return;
+                                }
+
+                                const exclusive = this.#life.exclusive(
+                                    Array.from(this.#talentSelected).map(({ id }) => id),
+                                    talent.id
+                                );
+                                if (exclusive != null) {
+                                    for (const { name, id } of this.#talentSelected) {
+                                        if (id == exclusive) {
+                                            this.hint(`与已选择的天赋【${name}】冲突`);
+                                            return;
+                                        }
+                                    }
+                                    return;
+                                }
+                                li.addClass('selected');
+                                this.#talentSelected.add(talent);
+                            }
+                        });
+                    });
+            });
+
+        talentPage
+            .find('#all')
+            .click(() => {
+                talentPage.find('.talentbtn').hide();
+                const ul = talentPage.find('#talents');
+                this.#life.talentRandom(-1)
                     .forEach(talent => {
                         const li = createTalent(talent);
                         ul.append(li);
