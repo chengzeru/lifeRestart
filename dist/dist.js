@@ -7074,12 +7074,18 @@ var Talent = /*#__PURE__*/function () {
       return new Array(num).fill(1).map(function (v, i) {
         if (!i && include) return include;
         var gradeRandom = Math.random();
-        var grade = 3;
+        var grade;
+        if (gradeRandom >= 0.2) grade = 0;else if (gradeRandom >= 0.05) grade = 1;else if (gradeRandom >= 0.01) grade = 2;else grade = 3;
 
         while (talentList[grade].length == 0) {
           grade--;
+
+          if (grade < 0) {
+            grade = 3;
+          }
         }
 
+        ;
         var length = talentList[grade].length;
         var random = Math.floor(Math.random() * length) % length;
         return talentList[grade].splice(random, 1)[0];
