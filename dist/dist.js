@@ -7489,8 +7489,8 @@ function app_checkPrivateRedeclaration(obj, privateCollection) { if (privateColl
 
 
 
-var talentNum = 8;
-var pointNum = 40;
+var talentNum = 30;
+var pointNum = 10000;
 
 var _life = /*#__PURE__*/new WeakMap();
 
