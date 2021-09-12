@@ -2,7 +2,7 @@ import { max, sum } from './functions/util.js';
 import { summary } from './functions/summary.js'
 import Life from './life.js'
 
-const talentNum = 30;
+const talentNum = 5;
 const pointNum = 10000;
 
 class App {
