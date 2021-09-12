@@ -247,8 +247,6 @@ class App {
         propertyPage
             .find('#random')
             .click(() => {
-                this.hint('人上人请自己选哦');
-                return;
                 let t = this.#totalMax;
                 const arr = [10, 10, 10, 10];
                 while (t > 0) {
@@ -270,10 +268,6 @@ class App {
         propertyPage
             .find('#start')
             .click(() => {
-                if (total() != this.#totalMax) {
-                    this.hint(`你还有${this.#totalMax - total()}属性点没有分配完`);
-                    return;
-                }
                 this.#life.restart({
                     CHR: groups.CHR.get(),
                     INT: groups.INT.get(),
